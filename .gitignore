@@ -43,3 +43,6 @@ app-example
 /android
 
 .direnv/
+.db/
+.logs
+.env

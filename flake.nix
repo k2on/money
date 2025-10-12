@@ -10,9 +10,18 @@
     formatter = forAllSystems (pkgs: pkgs.alejandra);
     devShells = forAllSystems (pkgs: {
       default = pkgs.mkShell {
+
+        shellHook = ''
+          dev() {
+            process-compose up -p 0
+          }
+        '';
         packages = with pkgs; [
           corepack
           nodejs_22
+
+          postgresql
+          process-compose
         ];
       };
     });

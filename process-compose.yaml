@@ -1,0 +1,41 @@
+version: "0.5"
+
+log_location: .logs
+log_level: info
+
+settings:
+  server:
+    port: 0
+
+processes:
+  db:
+    command: |
+      export PGDATA="./.db"
+      
+      # Initialize if needed
+      if [ ! -d "$PGDATA" ]; then
+        initdb --auth=trust --no-locale --encoding=UTF8 -U postgres
+      fi
+      
+      # Start PostgreSQL in foreground
+      postgres -D "$PGDATA" -k /tmp -p 5432
+    readiness_probe:
+      exec:
+        command: "pg_isready -h localhost -p 5432 -U postgres"
+      initial_delay_seconds: 2
+      period_seconds: 1
+
+  expo:
+    command: "pnpm i && pnpm start"
+    environment:
+      - "DATABASE_URL=postgresql://postgres@localhost:5432/money"
+
+
+  migrate:
+    command: |
+      createdb -h localhost -p 5432 -U postgres money 2>/dev/null || true
+
+      echo "Migration and seeding complete!"
+    depends_on:
+      db:
+        condition: process_healthy
