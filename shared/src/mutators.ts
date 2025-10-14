@@ -16,6 +16,12 @@ export function createMutators(authData: AuthData | null) {
           name,
           amount,
         })
+      },
+      async deleteAll(tx: Tx) {
+        const t = await tx.query.transaction.limit(10);
+        for (const i of t) {
+          await tx.mutate.transaction.delete({ id: i.id });
+        }
       }
     }
   } as const;

@@ -47,5 +47,12 @@ processes:
   zero:
     command: npx zero-cache-dev -p shared/src/schema.ts
     depends_on:
+      migrate:
+        condition: process_completed_successfully
+
+  studio:
+    command: npx drizzle-kit studio
+    working_dir: ./shared
+    depends_on:
       db:
         condition: process_healthy

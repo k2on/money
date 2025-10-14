@@ -1,11 +1,15 @@
 import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { genericOAuth } from "better-auth/plugins";
 import { expo } from "@better-auth/expo";
-import { Pool } from "pg";
+import { drizzleSchema } from "@money/shared/db";
+import { db } from "./db";
 
 export const auth = betterAuth({
-  database: new Pool({
-    connectionString: process.env.DATABASE_URL,
+  database: drizzleAdapter(db, {
+    schema: drizzleSchema,
+    provider: "pg",
+    usePlural: true,
   }),
   trustedOrigins: ["money://", "http://localhost:8081"],
   plugins: [

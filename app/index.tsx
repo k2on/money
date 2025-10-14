@@ -12,6 +12,7 @@ export default function HomeScreen() {
   }
   const z = useZero<Schema, Mutators>();
   const [transactions] = useQuery(queries.allTransactions(session));
+  const [user] = useQuery(queries.me(session));
 
   const onNew = () => {
     z.mutate.transaction.create({
@@ -22,10 +23,13 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView>
-      <Text>Hello {session?.user.name}</Text>
+      <Text>Hello {user?.name}</Text>
       <Button onPress={onLogout} title="Logout" />
       <Text>Transactions: {JSON.stringify(transactions, null, 4)}</Text>
       <Button onPress={onNew} title="New" />
+      <Button onPress={() => {
+        z.mutate.transaction.deleteAll();
+      }} title="Delete" />
     </SafeAreaView>
   );
 }

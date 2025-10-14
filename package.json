@@ -8,7 +8,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "db:migrate": "dotenv -- pnpm run --dir=shared db:migrate"
   },
   "dependencies": {
     "@better-auth/expo": "^1.3.27",
@@ -19,6 +20,7 @@
     "@react-navigation/native": "^7.1.8",
     "@rocicorp/zero": "^0.23.2025090100",
     "better-auth": "^1.3.27",
+    "drizzle-orm": "^0.44.6",
     "expo": "~54.0.13",
     "expo-constants": "~18.0.9",
     "expo-font": "~14.0.9",
@@ -46,6 +48,8 @@
   "devDependencies": {
     "@types/pg": "^8.15.5",
     "@types/react": "~19.1.0",
+    "dotenv-cli": "^10.0.0",
+    "drizzle-kit": "^0.31.5",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
     "typescript": "~5.9.2"

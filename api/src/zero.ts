@@ -13,6 +13,7 @@ import {
   createMutators as createMutatorsShared,
   queries,
   schema,
+  type Mutators,
 } from "@money/shared";
 import type { AuthData } from "@money/shared/auth";
 import { getHono } from "./hono";
@@ -25,11 +26,18 @@ const processor = new PushProcessor(
   ),
 );
 
+const createMutators = (authData: AuthData | null) => {
+  const mutators = createMutatorsShared(authData);
+  return {
+    ...mutators,
+  } as const satisfies Mutators;
+}
+
 const zero = getHono()
   .post("/mutate", async (c) => {
     const authData = c.get("auth");
 
-    const result = await processor.process(createMutatorsShared(authData), c.req.raw);
+    const result = await processor.process(createMutators(authData), c.req.raw);
 
     return c.json(result);
   })

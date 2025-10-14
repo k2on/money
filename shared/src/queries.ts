@@ -1,7 +1,7 @@
 import { syncedQueryWithContext } from "@rocicorp/zero";
 import { z } from "zod";
 import { builder } from "@money/shared";
-import type { AuthData } from "./auth";
+import { type AuthData } from "./auth";
 import { isLoggedIn } from "./zql";
 
 export const queries = {
@@ -12,4 +12,10 @@ export const queries = {
       .limit(10)
   }
   ),
+  me: syncedQueryWithContext('me', z.tuple([]), (authData: AuthData | null) => {
+    isLoggedIn(authData);
+    return builder.users
+      .where('id', '=', authData.user.id)
+      .one();
+  })
 };
