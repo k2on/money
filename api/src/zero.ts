@@ -1,6 +1,5 @@
 import {
   type ReadonlyJSONValue,
-  type ServerTransaction,
   withValidation,
 } from "@rocicorp/zero";
 import {
@@ -8,64 +7,33 @@ import {
   PushProcessor,
   ZQLDatabase,
 } from "@rocicorp/zero/server";
+import { PostgresJSConnection } from '@rocicorp/zero/pg';
+import postgres from 'postgres';
 import {
-  // createMutators as createMutatorsShared,
-  // isLoggedIn,
-  // type Mutators,
+  createMutators as createMutatorsShared,
   queries,
   schema,
-  type Schema,
 } from "@money/shared";
 import type { AuthData } from "@money/shared/auth";
-// import { auditLogs } from "@zslack/shared/db";
-// import {
-//   NodePgConnection,
-//   type NodePgZeroTransaction,
-// } from "drizzle-zero/node-postgres";
-import crypto from "node:crypto";
-// import { db } from "./db";
 import { getHono } from "./hono";
 
-// type ServerTx = ServerTransaction<Schema, NodePgZeroTransaction<typeof db>>;
 
-// const processor = new PushProcessor(
-//   new ZQLDatabase(new NodePgConnection(db), schema),
-// );
-//
-// const createMutators = (authData: AuthData | null) => {
-//   const mutators = createMutatorsShared(authData);
-//
-//   return {
-//     ...mutators,
-//     message: {
-//       ...mutators.message,
-//       async sendMessage(tx: ServerTx, params) {
-//         isLoggedIn(authData);
-//
-//         await mutators.message.sendMessage(tx, params);
-//
-//         // we can use the db tx to insert server-only data, like audit logs
-//         await tx.dbTransaction.wrappedTransaction.insert(auditLogs).values({
-//           id: crypto.randomUUID(),
-//           userId: authData.user.id,
-//           action: "sendMessage",
-//         });
-//       },
-//     },
-//   } as const satisfies Mutators;
-// };
+const processor = new PushProcessor(
+  new ZQLDatabase(
+    new PostgresJSConnection(postgres(process.env.ZERO_UPSTREAM_DB! as string)),
+    schema,
+  ),
+);
 
 const zero = getHono()
-  // .post("/mutate", async (c) => {
-  //   // get the auth data from betterauth
-  //   const authData = c.get("auth");
-  //
-  //   const result = await processor.process(createMutators(authData), c.req.raw);
-  //
-  //   return c.json(result);
-  // })
+  .post("/mutate", async (c) => {
+    const authData = c.get("auth");
+
+    const result = await processor.process(createMutatorsShared(authData), c.req.raw);
+
+    return c.json(result);
+  })
   .post("/get-queries", async (c) => {
-    // get the auth data from betterauth
     const authData = c.get("auth");
 
     const result = await handleGetQueriesRequest(

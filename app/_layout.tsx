@@ -7,7 +7,7 @@ import { useMemo } from 'react';
 import { authDataSchema } from '@/shared/src/auth';
 import { Platform } from 'react-native';
 import type { ZeroOptions } from '@rocicorp/zero';
-import { schema, type Schema } from '@/shared/src';
+import { schema, type Schema, createMutators, type Mutators } from '@/shared/src';
 import { expoSQLiteStoreProvider } from "@rocicorp/zero/react-native";
 
 export const unstable_settings = {
@@ -35,9 +35,9 @@ export default function RootLayout() {
       server: 'http://localhost:4848',
       userID: authData?.user.id ?? "anon",
       schema,
-      // mutators: createMutators(),
+      mutators: createMutators(authData),
       auth: cookie,
-    } as const satisfies ZeroOptions<Schema>; 
+    } as const satisfies ZeroOptions<Schema, Mutators>; 
   }, [authData, cookie]);
 
   return (
