@@ -26,16 +26,26 @@ processes:
       period_seconds: 1
 
   expo:
-    command: "pnpm i && pnpm start"
+    command: "pnpm start"
     environment:
       - "DATABASE_URL=postgresql://postgres@localhost:5432/money"
 
+  api:
+    command: "pnpm run dev"
+    working_dir: ./api
 
   migrate:
     command: |
       createdb -h localhost -p 5432 -U postgres money 2>/dev/null || true
 
+      psql -h localhost -p 5432 -U postgres -c "ALTER SYSTEM SET wal_level = 'logical';"
+
       echo "Migration and seeding complete!"
+    depends_on:
+      db:
+        condition: process_healthy
+  zero:
+    command: npx zero-cache-dev -p shared/src/schema.ts
     depends_on:
       db:
         condition: process_healthy

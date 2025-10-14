@@ -7,6 +7,7 @@ export const auth = betterAuth({
   database: new Pool({
     connectionString: process.env.DATABASE_URL,
   }),
+  trustedOrigins: ["money://", "http://localhost:8081"],
   plugins: [
     expo(),
     genericOAuth({

@@ -13,9 +13,11 @@
   "dependencies": {
     "@better-auth/expo": "^1.3.27",
     "@expo/vector-icons": "^15.0.2",
+    "@money/shared": "link:shared",
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
+    "@rocicorp/zero": "^0.23.2025090100",
     "better-auth": "^1.3.27",
     "expo": "~54.0.13",
     "expo-constants": "~18.0.9",
@@ -47,5 +49,14 @@
     "eslint-config-expo": "~10.0.0",
     "typescript": "~5.9.2"
   },
-  "private": true
+  "private": true,
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@rocicorp/zero-sqlite3"
+    ],
+    "ignoredBuiltDependencies": [
+      "esbuild",
+      "protobufjs"
+    ]
+  }
 }
