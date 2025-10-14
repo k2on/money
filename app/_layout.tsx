@@ -3,23 +3,50 @@ import 'react-native-reanimated';
 
 import { authClient } from '@/lib/auth-client';
 import { ZeroProvider } from '@rocicorp/zero/react';
-import { zero } from '@/lib/zero';
+import { useMemo } from 'react';
+import { authDataSchema } from '@/shared/src/auth';
+import { Platform } from 'react-native';
+import type { ZeroOptions } from '@rocicorp/zero';
+import { schema, type Schema } from '@/shared/src';
+import { expoSQLiteStoreProvider } from "@rocicorp/zero/react-native";
 
 export const unstable_settings = {
-  anchor: '(tabs)',
+  anchor: 'index',
 };
 
+const kvStore = Platform.OS === "web" ? undefined : expoSQLiteStoreProvider();
 
 export default function RootLayout() {
-  const { data, isPending } = authClient.useSession();
+  const { data: session, isPending } = authClient.useSession();
+
+  const authData = useMemo(() => {
+    const result = authDataSchema.safeParse(session);
+    return result.success ? result.data : null;
+  }, [session]);
+
+  const cookie = useMemo(() => {
+    return Platform.OS == 'web' ? undefined : authClient.getCookie();
+  }, [session, isPending]);
+
+  const zeroProps = useMemo(() => {
+    return {
+      storageKey: 'money',
+      kvStore,
+      server: 'http://localhost:4848',
+      userID: authData?.user.id ?? "anon",
+      schema,
+      // mutators: createMutators(),
+      auth: cookie,
+    } as const satisfies ZeroOptions<Schema>; 
+  }, [authData, cookie]);
 
   return (
-    <ZeroProvider zero={zero}>
+    <ZeroProvider {...zeroProps}>
       <Stack>
-        <Stack.Protected guard={!isPending && !!data}>
+        <Stack.Protected guard={!isPending && !!session}>
           <Stack.Screen name="index" />
         </Stack.Protected>
-        <Stack.Protected guard={!isPending && !data}>
+        <Stack.Protected guard={!isPending && !session}>
           <Stack.Screen name="auth" />
         </Stack.Protected>
       </Stack>

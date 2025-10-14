@@ -5,15 +5,15 @@ import { useQuery, useZero } from "@rocicorp/zero/react";
 import { queries } from '@money/shared';
 
 export default function HomeScreen() {
-  const { data } = authClient.useSession();
+  const { data: session } = authClient.useSession();
   const onLogout = () => {
     authClient.signOut();
   }
-  const [transactions] = useQuery(queries.allTransactions());
+  const [transactions] = useQuery(queries.allTransactions(session));
 
   return (
     <SafeAreaView>
-      <Text>Hello {data?.user.name}</Text>
+      <Text>Hello {session?.user.name}</Text>
       <Button onPress={onLogout} title="Logout" />
       <Text>Transactions: {JSON.stringify(transactions, null, 4)}</Text>
     </SafeAreaView>

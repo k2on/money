@@ -1,4 +1,4 @@
-import { createSchema, table, string, number, createBuilder, definePermissions } from "@rocicorp/zero";
+import { type Schema as ZeroSchema, createSchema, table, string, number, createBuilder, definePermissions } from "@rocicorp/zero";
 
 const transaction = table('transaction')
   .columns({
@@ -7,13 +7,20 @@ const transaction = table('transaction')
     name: string(),
     amount: number(),
   })
-  .primaryKey('id');
+  .primaryKey('id').schema;
 
-export const schema = createSchema({
-  tables: [transaction],
+export const schema = {
+  tables: { transaction },
+  relationships: {},
   enableLegacyMutators: false,
   enableLegacyQueries: false,
-});
+} satisfies ZeroSchema;
+
+// export const schema = createSchema({
+//   tables: [transaction],
+//   enableLegacyMutators: false,
+//   enableLegacyQueries: false,
+// });
 
 export const builder = createBuilder(schema);
 
