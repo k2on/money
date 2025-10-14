@@ -9,7 +9,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "db:migrate": "dotenv -- pnpm run --dir=shared db:migrate"
+    "db:migrate": "dotenv -- pnpm run --dir=shared db:migrate",
+    "db:gen": "dotenv -- pnpm run --dir=shared generate:zero"
   },
   "dependencies": {
     "@better-auth/expo": "^1.3.27",
