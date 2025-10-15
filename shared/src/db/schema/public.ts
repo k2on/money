@@ -1,4 +1,4 @@
-import { integer, pgTable, text, boolean, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, text, boolean, timestamp, uniqueIndex, decimal } from "drizzle-orm/pg-core";
 
 export const users = pgTable(
   "user",
@@ -18,7 +18,14 @@ export const transaction = pgTable("transaction", {
   id: text("id").primaryKey(),
   user_id: text("user_id").notNull(),
   name: text("name").notNull(),
-  amount: integer("amount").notNull(),
+  amount: decimal("amount").notNull(),
 });
 
+export const plaidLink = pgTable("plaidLink", {
+  id: text("id").primaryKey(),
+  user_id: text("user_id").notNull(),
+  link: text("link").notNull(),
+  token: text("token").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
 

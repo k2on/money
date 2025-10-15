@@ -21,6 +21,58 @@ type ZeroSchema = DrizzleToZeroSchema<typeof drizzleSchema>;
  */
 export const schema = {
   tables: {
+    plaidLink: {
+      name: "plaidLink",
+      columns: {
+        id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "plaidLink",
+            "id"
+          >,
+        },
+        user_id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "plaidLink",
+            "user_id"
+          >,
+        },
+        link: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "plaidLink",
+            "link"
+          >,
+        },
+        token: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "plaidLink",
+            "token"
+          >,
+        },
+        createdAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "plaidLink",
+            "createdAt"
+          >,
+          serverName: "created_at",
+        },
+      },
+      primaryKey: ["id"],
+    },
     transaction: {
       name: "transaction",
       columns: {
@@ -147,6 +199,11 @@ export const schema = {
  * This type is auto-generated from your Drizzle schema definition.
  */
 export type Schema = typeof schema;
+/**
+ * Represents a row from the "plaidLink" table.
+ * This type is auto-generated from your Drizzle schema definition.
+ */
+export type PlaidLink = Row<Schema["tables"]["plaidLink"]>;
 /**
  * Represents a row from the "transaction" table.
  * This type is auto-generated from your Drizzle schema definition.

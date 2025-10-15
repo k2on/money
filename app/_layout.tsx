@@ -45,6 +45,7 @@ export default function RootLayout() {
       <Stack>
         <Stack.Protected guard={!isPending && !!session}>
           <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="settings" options={{ headerShown: false }} />
         </Stack.Protected>
         <Stack.Protected guard={!isPending && !session}>
           <Stack.Screen name="auth" />

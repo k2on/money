@@ -1,40 +1,47 @@
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { authClient } from '@/lib/auth-client';
-import { Button, Text } from 'react-native';
+import { Button, Linking, ScrollView, Text, View } from 'react-native';
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import { queries, type Mutators, type Schema } from '@money/shared';
-import { randomUUID } from "expo-crypto";
+import { useEffect, useState } from 'react';
 
 export default function HomeScreen() {
   const { data: session } = authClient.useSession();
 
-  const onLogout = () => {
-    authClient.signOut();
-  }
   const z = useZero<Schema, Mutators>();
+  const [plaidLink] = useQuery(queries.getPlaidLink(session)); 
   const [transactions] = useQuery(queries.allTransactions(session));
-  const [user] = useQuery(queries.me(session));
 
-  const onNew = () => {
-    z.mutate.transaction.create({
-      id: randomUUID(),
-      name: "Uber",
-      amount: 100,
-    })
-  };
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "j") {
+        setIdx((prevIdx) => {
+          if (prevIdx + 1 == transactions.length) return prevIdx;
+          return prevIdx + 1
+        });
+      } else if (event.key === "k") {
+        setIdx((prevIdx) => prevIdx == 0 ? 0 : prevIdx - 1);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    // Cleanup listener on unmount
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [transactions]);
 
   return (
-    <SafeAreaView>
-      <Text>Hello {user?.name}</Text>
-      <Button onPress={onLogout} title="Logout" />
-      <Text>Transactions: {JSON.stringify(transactions, null, 4)}</Text>
-      <Button onPress={onNew} title="New" />
-      <Button onPress={() => {
-        z.mutate.transaction.deleteAll();
-      }} title="Delete" />
-      <Button onPress={() => {
-        z.mutate.link.create();
-      }} title="Open link" />
-    </SafeAreaView>
+    <ScrollView>
+      {plaidLink && <Button onPress={() => {
+        z.mutate.link.updateTransactions();
+      }} title="Update transactions" />}
+      {transactions.map((t, i) => <View style={{ backgroundColor: i == idx ? 'black' : undefined }} key={t.id}>
+        <Text style={{ fontFamily: 'mono', color: i == idx ? 'white' : undefined }}>{t.name} {t.amount}</Text>
+      </View>)}
+    </ScrollView>
   );
 }

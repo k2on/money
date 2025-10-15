@@ -92,3 +92,10 @@ export const auditLogs = pgTable("audit_log", {
     .references(() => users.id, { onDelete: "cascade" }),
   action: text("action").notNull(),
 });
+
+export const plaidAccessTokens = pgTable("plaidAccessToken", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  token: text("token").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});

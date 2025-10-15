@@ -17,5 +17,12 @@ export const queries = {
     return builder.users
       .where('id', '=', authData.user.id)
       .one();
-  })
+  }),
+  getPlaidLink: syncedQueryWithContext('getPlaidLink', z.tuple([]), (authData: AuthData | null) => {
+    isLoggedIn(authData);
+    return builder.plaidLink
+      .where('user_id', '=', authData.user.id)
+      .orderBy('createdAt', 'desc')
+      .one();
+  }),
 };
