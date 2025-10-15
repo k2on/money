@@ -3,6 +3,7 @@ import { authClient } from '@/lib/auth-client';
 import { Button, Text } from 'react-native';
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import { queries, type Mutators, type Schema } from '@money/shared';
+import { randomUUID } from "expo-crypto";
 
 export default function HomeScreen() {
   const { data: session } = authClient.useSession();
@@ -16,6 +17,7 @@ export default function HomeScreen() {
 
   const onNew = () => {
     z.mutate.transaction.create({
+      id: randomUUID(),
       name: "Uber",
       amount: 100,
     })
