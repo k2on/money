@@ -28,6 +28,7 @@ export function createMutators(authData: AuthData | null) {
       async create() {},
       async get(tx: Tx, { link_token }: { link_token: string }) {},
       async updateTransactions() {},
+      async updateBalences() {},
     }
   } as const;
 }

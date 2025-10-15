@@ -23,8 +23,8 @@ import { getHono } from "./hono";
 import { Configuration, CountryCode, PlaidApi, PlaidEnvironments, Products } from "plaid";
 import { randomUUID } from "crypto";
 import { db } from "./db";
-import { plaidAccessTokens, plaidLink, transaction } from "@money/shared/db";
-import { eq } from "drizzle-orm";
+import { balance, plaidAccessTokens, plaidLink, transaction } from "@money/shared/db";
+import { asc, desc, eq, sql } from "drizzle-orm";
 
 
 const configuration = new Configuration({
@@ -118,11 +118,39 @@ const createMutators = (authData: AuthData | null) => {
             id: randomUUID(),
             user_id: authData.user.id,
             name: t.name,
-            amount: t.amount,
+            amount: t.amount.toString(),
           });
         }
 
-      }
+      },
+      async updateBalences() {
+        isLoggedIn(authData);
+        const accounts = await db.query.plaidAccessTokens.findMany({
+          where: eq(plaidAccessTokens.userId, authData.user.id),
+        });
+        if (accounts.length == 0) {
+          console.error("No accounts");
+          return;
+        }
+
+        for (const account of accounts) {
+          const { data } = await plaidClient.accountsBalanceGet({
+            access_token: account.token
+          });
+          await db.insert(balance).values(data.accounts.map(bal => ({
+            id: randomUUID(),
+            user_id: authData.user.id,
+            plaid_id: bal.account_id,
+            avaliable: bal.balances.available as any,
+            current: bal.balances.current as any,
+            name: bal.name,
+          }))).onConflictDoUpdate({
+            target: balance.plaid_id,
+            set: { current: sql.raw(`excluded.${balance.current.name}`), avaliable: sql.raw(`excluded.${balance.avaliable.name}`) }
+          })
+        }
+
+      },
     }
   } as const satisfies Mutators;
 }

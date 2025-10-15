@@ -1,3 +1,4 @@
+import { definePermissions } from "@rocicorp/zero";
 import { pgTable, text, boolean, timestamp, uniqueIndex, decimal } from "drizzle-orm/pg-core";
 
 export const users = pgTable(
@@ -29,3 +30,13 @@ export const plaidLink = pgTable("plaidLink", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const balance = pgTable("balance", {
+  id: text("id").primaryKey(),
+  user_id: text("userId").notNull(),
+  plaid_id: text("plaidId").notNull().unique(),
+  avaliable: decimal("avaliable").notNull(),
+  current: decimal("current").notNull(),
+  name: text("name").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+})

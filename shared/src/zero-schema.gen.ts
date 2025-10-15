@@ -21,6 +21,88 @@ type ZeroSchema = DrizzleToZeroSchema<typeof drizzleSchema>;
  */
 export const schema = {
   tables: {
+    balance: {
+      name: "balance",
+      columns: {
+        id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "balance",
+            "id"
+          >,
+        },
+        user_id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "balance",
+            "user_id"
+          >,
+          serverName: "userId",
+        },
+        plaid_id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "balance",
+            "plaid_id"
+          >,
+          serverName: "plaidId",
+        },
+        avaliable: {
+          type: "number",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "balance",
+            "avaliable"
+          >,
+        },
+        current: {
+          type: "number",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "balance",
+            "current"
+          >,
+        },
+        name: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "balance",
+            "name"
+          >,
+        },
+        createdAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "balance",
+            "createdAt"
+          >,
+          serverName: "created_at",
+        },
+        updatedAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "balance",
+            "updatedAt"
+          >,
+          serverName: "updated_at",
+        },
+      },
+      primaryKey: ["id"],
+    },
     plaidLink: {
       name: "plaidLink",
       columns: {
@@ -199,6 +281,11 @@ export const schema = {
  * This type is auto-generated from your Drizzle schema definition.
  */
 export type Schema = typeof schema;
+/**
+ * Represents a row from the "balance" table.
+ * This type is auto-generated from your Drizzle schema definition.
+ */
+export type Balance = Row<Schema["tables"]["balance"]>;
 /**
  * Represents a row from the "plaidLink" table.
  * This type is auto-generated from your Drizzle schema definition.

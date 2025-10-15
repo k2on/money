@@ -25,4 +25,9 @@ export const queries = {
       .orderBy('createdAt', 'desc')
       .one();
   }),
+  getBalances: syncedQueryWithContext('getBalances', z.tuple([]), (authData: AuthData | null) => {
+    isLoggedIn(authData);
+    return builder.balance
+      .where('user_id', '=', authData.user.id);
+  })
 };

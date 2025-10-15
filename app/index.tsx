@@ -1,4 +1,3 @@
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { authClient } from '@/lib/auth-client';
 import { Button, Linking, ScrollView, Text, View } from 'react-native';
 import { useQuery, useZero } from "@rocicorp/zero/react";
@@ -11,6 +10,7 @@ export default function HomeScreen() {
   const z = useZero<Schema, Mutators>();
   const [plaidLink] = useQuery(queries.getPlaidLink(session)); 
   const [transactions] = useQuery(queries.allTransactions(session));
+  const [balances] = useQuery(queries.getBalances(session));
 
   const [idx, setIdx] = useState(0);
 
@@ -28,7 +28,6 @@ export default function HomeScreen() {
 
     window.addEventListener("keydown", handleKeyDown);
 
-    // Cleanup listener on unmount
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
@@ -39,6 +38,16 @@ export default function HomeScreen() {
       {plaidLink && <Button onPress={() => {
         z.mutate.link.updateTransactions();
       }} title="Update transactions" />}
+      {plaidLink && <Button onPress={() => {
+        z.mutate.link.updateBalences();
+      }} title="Update bal" />}
+
+      <View style={{ backgroundColor: 'red' }}>
+        {balances.map(bal => <View>
+          <Text style={{ fontFamily: 'mono', color: 'white' }}>{bal.name}: {bal.current} ({bal.avaliable})</Text>
+        </View>)}
+      </View>
+
       {transactions.map((t, i) => <View style={{ backgroundColor: i == idx ? 'black' : undefined }} key={t.id}>
         <Text style={{ fontFamily: 'mono', color: i == idx ? 'white' : undefined }}>{t.name} {t.amount}</Text>
       </View>)}
