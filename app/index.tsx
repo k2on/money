@@ -32,6 +32,9 @@ export default function HomeScreen() {
       <Button onPress={() => {
         z.mutate.transaction.deleteAll();
       }} title="Delete" />
+      <Button onPress={() => {
+        z.mutate.link.create();
+      }} title="Open link" />
     </SafeAreaView>
   );
 }

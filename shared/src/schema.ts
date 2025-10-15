@@ -1,10 +1,4 @@
-import { type Schema as ZeroSchema, definePermissions } from "@rocicorp/zero";
-import { schema as genSchema } from "./zero-schema.gen";
-
-export const schema = {
-  ...genSchema,
-  enableLegacyMutators: false,
-  enableLegacyQueries: false,
-} satisfies ZeroSchema;
+import { definePermissions } from "@rocicorp/zero";
+import { schema } from "./zero-schema.gen";
 
 export const permissions = definePermissions(schema, () => ({}));

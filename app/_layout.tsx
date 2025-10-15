@@ -44,7 +44,7 @@ export default function RootLayout() {
     <ZeroProvider {...zeroProps}>
       <Stack>
         <Stack.Protected guard={!isPending && !!session}>
-          <Stack.Screen name="index" />
+          <Stack.Screen name="index" options={{ headerShown: false }} />
         </Stack.Protected>
         <Stack.Protected guard={!isPending && !session}>
           <Stack.Screen name="auth" />

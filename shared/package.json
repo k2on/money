@@ -12,7 +12,7 @@
     "drizzle-zero": "^0.14.3"
   },
   "scripts": {
-    "generate:zero": "drizzle-zero generate -s ./src/db/schema/public.ts -o ./src/zero-schema.gen.ts -f",
+    "generate:zero": "drizzle-zero generate -s ./src/db/schema/public.ts -o ./src/zero-schema.gen.ts -f && sed -i 's/enableLegacyQueries: true,/enableLegacyQueries: false,/g' src/zero-schema.gen.ts && sed -i 's/enableLegacyMutators: true,/enableLegacyMutators: false,/g' src/zero-schema.gen.ts",
     "db:migrate": "drizzle-kit push"
   }
 }

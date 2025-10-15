@@ -22,7 +22,10 @@ export function createMutators(authData: AuthData | null) {
         for (const i of t) {
           await tx.mutate.transaction.delete({ id: i.id });
         }
-      }
+      },
+    },
+    link: {
+      async create() {}
     }
   } as const;
 }

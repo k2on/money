@@ -17,6 +17,7 @@ import {
 } from "@money/shared";
 import type { AuthData } from "@money/shared/auth";
 import { getHono } from "./hono";
+import { db } from "./db";
 
 
 const processor = new PushProcessor(
@@ -30,6 +31,12 @@ const createMutators = (authData: AuthData | null) => {
   const mutators = createMutatorsShared(authData);
   return {
     ...mutators,
+    link: {
+      ...mutators.link,
+      async create() {
+        console.log("Here is my function running on the server!!!");
+      }
+    }
   } as const satisfies Mutators;
 }
 

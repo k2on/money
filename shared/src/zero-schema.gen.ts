@@ -138,8 +138,8 @@ export const schema = {
     },
   },
   relationships: {},
-  enableLegacyQueries: true,
-  enableLegacyMutators: true,
+  enableLegacyQueries: false,
+  enableLegacyMutators: false,
 } as const;
 
 /**
