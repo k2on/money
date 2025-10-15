@@ -18,8 +18,14 @@ export const users = pgTable(
 export const transaction = pgTable("transaction", {
   id: text("id").primaryKey(),
   user_id: text("user_id").notNull(),
+  plaid_id: text("plaid_id").notNull().unique(),
   name: text("name").notNull(),
   amount: decimal("amount").notNull(),
+  datetime: timestamp("datetime"),
+  authorized_datetime: timestamp("authorized_datetime"),
+  json: text("json"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const plaidLink = pgTable("plaidLink", {

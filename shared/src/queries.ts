@@ -9,7 +9,8 @@ export const queries = {
     isLoggedIn(authData);
     return builder.transaction
       .where('user_id', '=', authData.user.id)
-      .limit(10)
+      .orderBy('datetime', 'desc')
+      .limit(50)
   }
   ),
   me: syncedQueryWithContext('me', z.tuple([]), (authData: AuthData | null) => {

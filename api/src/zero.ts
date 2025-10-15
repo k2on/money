@@ -24,7 +24,7 @@ import { Configuration, CountryCode, PlaidApi, PlaidEnvironments, Products } fro
 import { randomUUID } from "crypto";
 import { db } from "./db";
 import { balance, plaidAccessTokens, plaidLink, transaction } from "@money/shared/db";
-import { asc, desc, eq, sql } from "drizzle-orm";
+import { asc, desc, eq, sql, type InferInsertModel } from "drizzle-orm";
 
 
 const configuration = new Configuration({
@@ -79,6 +79,7 @@ const createMutators = (authData: AuthData | null) => {
           token: link_token,
         });
       },
+
       async get(_, { link_token }) {
         isLoggedIn(authData);
 
@@ -100,29 +101,41 @@ const createMutators = (authData: AuthData | null) => {
           token: data.access_token,
         });
       },
+
       async updateTransactions() {
         isLoggedIn(authData);
-        const accessToken = await db.query.plaidAccessTokens.findFirst({
-          where: eq(plaidAccessTokens.userId, authData.user.id)
+        const accounts = await db.query.plaidAccessTokens.findMany({
+          where: eq(plaidAccessTokens.userId, authData.user.id),
         });
-        if (!accessToken) throw Error("No plaid account");
-
-        const { data } = await plaidClient.transactionsGet({
-          access_token: accessToken.token,
-          start_date: "2025-10-01",
-          end_date: "2025-10-15",
-        });
-
-        for (const t of data.transactions) {
-          await db.insert(transaction).values({
-            id: randomUUID(),
-            user_id: authData.user.id,
-            name: t.name,
-            amount: t.amount.toString(),
-          });
+        if (accounts.length == 0) {
+          console.error("No accounts");
+          return;
         }
 
+        for (const account of accounts) {
+          const { data } = await plaidClient.transactionsGet({
+            access_token: account.token,
+            start_date: "2025-10-01",
+            end_date: "2025-10-15",
+          });
+
+          const transactions = data.transactions.map(tx => ({
+            id: randomUUID(),
+            user_id: authData.user.id,
+            plaid_id: tx.transaction_id,
+            name: tx.name,
+            amount: tx.amount as any,
+            datetime: tx.datetime ? new Date(tx.datetime) : new Date(tx.date),
+            authorized_datetime: tx.authorized_datetime ? new Date(tx.authorized_datetime) : undefined,
+            json: JSON.stringify(tx),
+          } satisfies InferInsertModel<typeof transaction>));
+
+          await db.insert(transaction).values(transactions).onConflictDoNothing({
+            target: transaction.plaid_id,
+          })
+        }
       },
+
       async updateBalences() {
         isLoggedIn(authData);
         const accounts = await db.query.plaidAccessTokens.findMany({

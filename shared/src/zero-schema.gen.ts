@@ -176,6 +176,15 @@ export const schema = {
             "user_id"
           >,
         },
+        plaid_id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "transaction",
+            "plaid_id"
+          >,
+        },
         name: {
           type: "string",
           optional: false,
@@ -193,6 +202,53 @@ export const schema = {
             "transaction",
             "amount"
           >,
+        },
+        datetime: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "transaction",
+            "datetime"
+          >,
+        },
+        authorized_datetime: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "transaction",
+            "authorized_datetime"
+          >,
+        },
+        json: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "transaction",
+            "json"
+          >,
+        },
+        createdAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "transaction",
+            "createdAt"
+          >,
+          serverName: "created_at",
+        },
+        updatedAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "transaction",
+            "updatedAt"
+          >,
+          serverName: "updated_at",
         },
       },
       primaryKey: ["id"],
