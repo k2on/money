@@ -8,7 +8,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "build": "expo export --platform web"
+    "build": "expo export --platform web",
     "lint": "expo lint",
     "db:migrate": "dotenv -- pnpm run --dir=shared db:migrate",
     "db:gen": "dotenv -- pnpm run --dir=shared generate:zero"
