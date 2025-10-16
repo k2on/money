@@ -24,7 +24,7 @@ import { Configuration, CountryCode, PlaidApi, PlaidEnvironments, Products } fro
 import { randomUUID } from "crypto";
 import { db } from "./db";
 import { balance, plaidAccessTokens, plaidLink, transaction } from "@money/shared/db";
-import { asc, desc, eq, sql, type InferInsertModel } from "drizzle-orm";
+import { asc, desc, eq, inArray, sql, type InferInsertModel } from "drizzle-orm";
 
 
 const configuration = new Configuration({
@@ -123,6 +123,7 @@ const createMutators = (authData: AuthData | null) => {
             id: randomUUID(),
             user_id: authData.user.id,
             plaid_id: tx.transaction_id,
+            account_id: tx.account_id,
             name: tx.name,
             amount: tx.amount as any,
             datetime: tx.datetime ? new Date(tx.datetime) : new Date(tx.date),
@@ -132,7 +133,15 @@ const createMutators = (authData: AuthData | null) => {
 
           await db.insert(transaction).values(transactions).onConflictDoNothing({
             target: transaction.plaid_id,
-          })
+          });
+
+          const txReplacingPendingIds = data.transactions
+            .filter(t => t.pending_transaction_id)
+            .map(t => t.pending_transaction_id!);
+
+          await db.delete(transaction)
+            .where(inArray(transaction.plaid_id, txReplacingPendingIds));
+
         }
       },
 

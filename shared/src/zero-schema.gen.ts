@@ -185,6 +185,15 @@ export const schema = {
             "plaid_id"
           >,
         },
+        account_id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "transaction",
+            "account_id"
+          >,
+        },
         name: {
           type: "string",
           optional: false,

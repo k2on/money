@@ -19,6 +19,7 @@ export const transaction = pgTable("transaction", {
   id: text("id").primaryKey(),
   user_id: text("user_id").notNull(),
   plaid_id: text("plaid_id").notNull().unique(),
+  account_id: text("account_id").notNull(),
   name: text("name").notNull(),
   amount: decimal("amount").notNull(),
   datetime: timestamp("datetime"),
