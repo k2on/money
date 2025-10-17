@@ -32,7 +32,7 @@ export default function RootLayout() {
     return {
       storageKey: 'money',
       kvStore,
-      server: 'http://localhost:4848',
+      server: process.env.NODE_ENV == 'production' ? 'https://zero.koon.us' : 'http://localhost:4848',
       userID: authData?.user.id ?? "anon",
       schema,
       mutators: createMutators(authData),

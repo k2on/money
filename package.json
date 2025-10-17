@@ -11,7 +11,8 @@
     "build": "expo export --platform web",
     "lint": "expo lint",
     "db:migrate": "dotenv -- pnpm run --dir=shared db:migrate",
-    "db:gen": "dotenv -- pnpm run --dir=shared generate:zero"
+    "db:gen": "dotenv -- pnpm run --dir=shared generate:zero",
+    "dev": "process-compose up -p 0"
   },
   "dependencies": {
     "@better-auth/expo": "^1.3.27",
