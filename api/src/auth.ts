@@ -11,7 +11,7 @@ export const auth = betterAuth({
     provider: "pg",
     usePlural: true,
   }),
-  trustedOrigins: ["money://", "http://localhost:8081"],
+  trustedOrigins: ["money://", "http://localhost:8081", "https://money.koon.us"],
   plugins: [
     expo(),
     genericOAuth({
