@@ -12,6 +12,12 @@ export const auth = betterAuth({
     usePlural: true,
   }),
   trustedOrigins: ["money://", "http://localhost:8081", "https://money.koon.us"],
+  advanced: {
+      crossSubDomainCookies: {
+          enabled: true,
+          domain: "koon.us",
+      },
+  },
   plugins: [
     expo(),
     genericOAuth({
