@@ -10,7 +10,7 @@ const app = getHono();
 app.use(
   "/api/*",
   cors({
-    origin: 'https://money.koon.us',
+    origin: ['https://money.koon.us','http://localhost:8081'],
     allowMethods: ["POST", "GET", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
     credentials: true,

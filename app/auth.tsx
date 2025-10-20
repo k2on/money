@@ -5,7 +5,7 @@ export default function Auth() {
   const onLogin = () => {
     authClient.signIn.oauth2({
       providerId: "koon-family",
-      callbackURL: "http://localhost:8081"
+      callbackURL: process.env.NODE_ENV == 'production' ? 'https://money.koon.us' : "http://localhost:8081"
     });
   };
 
