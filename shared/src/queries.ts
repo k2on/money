@@ -1,6 +1,6 @@
 import { syncedQueryWithContext } from "@rocicorp/zero";
 import { z } from "zod";
-import { builder } from "@money/shared";
+import { builder } from ".";
 import { type AuthData } from "./auth";
 import { isLoggedIn } from "./zql";
 
@@ -13,12 +13,6 @@ export const queries = {
       .limit(50)
   }
   ),
-  me: syncedQueryWithContext('me', z.tuple([]), (authData: AuthData | null) => {
-    isLoggedIn(authData);
-    return builder.users
-      .where('id', '=', authData.user.id)
-      .one();
-  }),
   getPlaidLink: syncedQueryWithContext('getPlaidLink', z.tuple([]), (authData: AuthData | null) => {
     isLoggedIn(authData);
     return builder.plaidLink

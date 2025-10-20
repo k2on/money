@@ -47,7 +47,7 @@ app.get("/", (c) => c.text("OK"));
 serve(
   {
     fetch: app.fetch,
-    port: 3000,
+    port: process.env.PORT ? parseInt(process.env.PORT) : 3000,
   },
   (info) => {
     console.log(`Server is running on ${info.address}:${info.port}`);
