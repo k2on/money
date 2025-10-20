@@ -10,7 +10,10 @@ const app = getHono();
 app.use(
   "/api/*",
   cors({
-    origin: "*",
+    origin: (origin) =>
+      origin && /^https:\/\/([a-z0-9-]+\.)?koon\.us$/.test(origin)
+        ? origin
+        : "",
     allowMethods: ["POST", "GET", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
     credentials: true,
