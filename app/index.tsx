@@ -1,5 +1,5 @@
 import { authClient } from '@/lib/auth-client';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, Text, View } from 'react-native';
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import { queries, type Mutators, type Schema } from '@money/shared';
 import { useEffect, useState } from 'react';
@@ -58,6 +58,12 @@ export default function HomeScreen() {
     return Array.from({ length: LEN - nstr.length }).join(" ") + nstr;
   }
 
+  function uuu(t: typeof filteredTransactions[number]): string | undefined {
+    if (!t.json) return;
+    const j = JSON.parse(t.json);
+    return j.counterparties.filter((c: any) => !!c.logo_url).at(0)?.logo_url || j.personal_finance_category_icon_url;
+  }
+
   return (
     <View>
       <View style={{ flexDirection: "row" }}>
@@ -71,7 +77,12 @@ export default function HomeScreen() {
           {filteredTransactions.map((t, i) => <Pressable onHoverIn={() => {
             setIdx(i);
           }} style={{ backgroundColor: i == idx ? 'black' : undefined, cursor: 'default' as 'auto' }} key={t.id}>
-            <Text style={{ fontFamily: 'mono', color: i == idx ? 'white' : undefined }}>{new Date(t.datetime!).toDateString()} <Text style={{ color: t.amount > 0 ? 'red' : 'green' }}>{lpad(t.amount)}</Text> {t.name.substring(0, 50)}</Text>
+            <Text style={{ fontFamily: 'mono', color: i == idx ? 'white' : undefined }}>
+              {new Date(t.datetime!).toDateString()}
+              <Text style={{ color: t.amount > 0 ? 'red' : 'green' }}> {lpad(t.amount)}</Text>
+              <Image style={{ width: 15, height: 15, marginHorizontal: 10 }} source={{ uri: uuu(t) || "" }} />
+              {t.name.substring(0, 50)}
+            </Text>
           </Pressable>)}
         </View>
         <ScrollView>

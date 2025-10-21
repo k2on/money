@@ -116,7 +116,7 @@ const createMutators = (authData: AuthData | null) => {
           const { data } = await plaidClient.transactionsGet({
             access_token: account.token,
             start_date: "2025-10-01",
-            end_date: "2025-10-18",
+            end_date: new Date().toISOString().split("T")[0],
           });
 
           const transactions = data.transactions.map(tx => ({
