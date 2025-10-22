@@ -24,11 +24,11 @@ import { Configuration, CountryCode, PlaidApi, PlaidEnvironments, Products } fro
 import { randomUUID } from "crypto";
 import { db } from "./db";
 import { balance, plaidAccessTokens, plaidLink, transaction } from "@money/shared/db";
-import { asc, desc, eq, inArray, sql, type InferInsertModel } from "drizzle-orm";
+import { eq, inArray, sql, type InferInsertModel } from "drizzle-orm";
 
 
 const configuration = new Configuration({
-  basePath: PlaidEnvironments.production,
+  basePath: process.env.PLAID_ENV == 'production' ? PlaidEnvironments.production : PlaidEnvironments.sandbox,
   baseOptions: {
     headers: {
       'PLAID-CLIENT-ID': process.env.PLAID_CLIENT_ID,
