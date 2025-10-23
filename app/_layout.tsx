@@ -7,7 +7,7 @@ import { useMemo } from 'react';
 import { authDataSchema } from '@/shared/src/auth';
 import { Platform } from 'react-native';
 import type { ZeroOptions } from '@rocicorp/zero';
-import { schema, type Schema, createMutators, type Mutators } from '@/shared/src';
+import { schema, type Schema, createMutators, type Mutators, BASE_URL } from '@/shared/src';
 import { expoSQLiteStoreProvider } from "@rocicorp/zero/react-native";
 
 export const unstable_settings = {
@@ -32,7 +32,7 @@ export default function RootLayout() {
     return {
       storageKey: 'money',
       kvStore,
-      server: process.env.NODE_ENV == 'production' ? 'https://zero.koon.us' : 'http://localhost:4848',
+      server: process.env.NODE_ENV == 'production' ? 'https://zero.koon.us' : `${BASE_URL}:4848`,
       userID: authData?.user.id ?? "anon",
       schema,
       mutators: createMutators(authData),

@@ -4,6 +4,7 @@ import { genericOAuth } from "better-auth/plugins";
 import { expo } from "@better-auth/expo";
 import { drizzleSchema } from "@money/shared/db";
 import { db } from "./db";
+import { BASE_URL, HOST } from "@money/shared";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -11,10 +12,16 @@ export const auth = betterAuth({
     provider: "pg",
     usePlural: true,
   }),
-  trustedOrigins: ["money://", "http://localhost:8081", "https://money.koon.us"],
+  trustedOrigins: [
+    "http://localhost:8081",
+    `exp://${HOST}:8081`,
+    `${BASE_URL}:8081`,
+    "https://money.koon.us",
+    "money://",
+  ],
   advanced: {
       crossSubDomainCookies: {
-          enabled: true,
+          enabled: process.env.NODE_ENV == 'production',
           domain: "koon.us",
       },
   },

@@ -1,5 +1,6 @@
 import { serve } from "@hono/node-server";
 import { authDataSchema } from "@money/shared/auth";
+import { BASE_URL } from "@money/shared";
 import { cors } from "hono/cors";
 import { auth } from "./auth";
 import { getHono } from "./hono";
@@ -10,7 +11,7 @@ const app = getHono();
 app.use(
   "/api/*",
   cors({
-    origin: ['https://money.koon.us','http://localhost:8081'],
+    origin: ['https://money.koon.us', `${BASE_URL}:8081`],
     allowMethods: ["POST", "GET", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
     credentials: true,
