@@ -30,5 +30,11 @@ export const queries = {
     return builder.balance
       .where('user_id', '=', authData.user.id)
       .orderBy('name', 'asc');
+  }),
+  getItems: syncedQueryWithContext('getItems', z.tuple([]), (authData: AuthData | null) => {
+    isLoggedIn(authData);
+    return builder.plaidAccessTokens
+      .where('userId', '=', authData.user.id)
+      .orderBy('createdAt', 'desc');
   })
 };

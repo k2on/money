@@ -103,6 +103,69 @@ export const schema = {
       },
       primaryKey: ["id"],
     },
+    plaidAccessTokens: {
+      name: "plaidAccessTokens",
+      columns: {
+        id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "plaidAccessTokens",
+            "id"
+          >,
+        },
+        name: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "plaidAccessTokens",
+            "name"
+          >,
+        },
+        logoUrl: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "plaidAccessTokens",
+            "logoUrl"
+          >,
+        },
+        userId: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "plaidAccessTokens",
+            "userId"
+          >,
+          serverName: "user_id",
+        },
+        token: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "plaidAccessTokens",
+            "token"
+          >,
+        },
+        createdAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "plaidAccessTokens",
+            "createdAt"
+          >,
+          serverName: "created_at",
+        },
+      },
+      primaryKey: ["id"],
+      serverName: "plaidAccessToken",
+    },
     plaidLink: {
       name: "plaidLink",
       columns: {
@@ -351,6 +414,11 @@ export type Schema = typeof schema;
  * This type is auto-generated from your Drizzle schema definition.
  */
 export type Balance = Row<Schema["tables"]["balance"]>;
+/**
+ * Represents a row from the "plaidAccessTokens" table.
+ * This type is auto-generated from your Drizzle schema definition.
+ */
+export type PlaidAccessToken = Row<Schema["tables"]["plaidAccessTokens"]>;
 /**
  * Represents a row from the "plaidLink" table.
  * This type is auto-generated from your Drizzle schema definition.

@@ -4,6 +4,7 @@ import { useQuery, useZero } from "@rocicorp/zero/react";
 import { queries, type Mutators, type Schema } from '@money/shared';
 import { useEffect, useState } from 'react';
 import { Link } from 'expo-router';
+import Header from '@/components/Header';
 
 export default function HomeScreen() {
   const { data: session } = authClient.useSession();
@@ -68,9 +69,7 @@ export default function HomeScreen() {
 
   return (
     <View>
-      <Link prefetch href="/settings">
-        <Button title="Settings" />
-      </Link>
+      <Header />
       <View style={{ flexDirection: "row" }}>
         <View style={{ backgroundColor: '' }}>
           {balances.map((bal, i) => <View key={bal.id} style={{ backgroundColor: i == accountIdx ? 'black' : undefined}}>
