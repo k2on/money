@@ -4,10 +4,10 @@ import 'react-native-reanimated';
 import { authClient } from '@/lib/auth-client';
 import { ZeroProvider } from '@rocicorp/zero/react';
 import { useMemo } from 'react';
-import { authDataSchema } from '@/shared/src/auth';
+import { authDataSchema } from '@money/shared/auth';
 import { Platform } from 'react-native';
 import type { ZeroOptions } from '@rocicorp/zero';
-import { schema, type Schema, createMutators, type Mutators, BASE_URL } from '@/shared/src';
+import { schema, type Schema, createMutators, type Mutators, BASE_URL } from '@money/shared';
 import { expoSQLiteStoreProvider } from "@rocicorp/zero/react-native";
 
 export const unstable_settings = {

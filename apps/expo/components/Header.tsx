@@ -1,5 +1,5 @@
 import { authClient } from "@/lib/auth-client";
-import { queries } from "@/shared/src";
+import { queries } from "@money/shared";
 import { useQuery } from "@rocicorp/zero/react";
 import { Link, usePathname, useRouter, type LinkProps } from "expo-router";
 import { useEffect } from "react";
@@ -42,7 +42,7 @@ export default function Header() {
   
 
   return (
-    <View style={{ flexDirection: "row", justifyContent: "space-between", backgroundColor: "#efe" }}>
+    <View style={{ flexDirection: "row", justifyContent: "space-between", backgroundColor: "#f7e2c8" }}>
       <View style={{ flexDirection: "row" }}>
         {PAGES.map(page => <Page
           key={page.name}

@@ -29,14 +29,13 @@ processes:
     command: "pnpm tsx ./scripts/set-machine-name.ts"
 
   expo:
-    command: "pnpm start"
+    command: "pnpm --filter=@money/expo start"
     depends_on:
       tailscale_machine_name:
         condition: process_completed_successfully
 
   api:
-    command: "pnpm run dev"
-    working_dir: ./api
+    command: "pnpm --filter=@money/api dev"
 
   migrate:
     command: |
@@ -49,7 +48,7 @@ processes:
       db:
         condition: process_healthy
   zero:
-    command: npx zero-cache-dev -p shared/src/schema.ts
+    command: npx zero-cache-dev -p packages/shared/src/schema.ts
     depends_on:
       migrate:
         condition: process_completed_successfully
