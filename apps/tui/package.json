@@ -1,0 +1,22 @@
+{
+  "name": "@money/tui",
+  "version": "0.0.1",
+  "scripts": {
+    "build": "bun run build.js",
+    "start": "bun run dist/index.js"
+  },
+  "peerDependencies": {
+    "react": "*"
+  },
+  "dependencies": {
+    "@money/ui": "workspace:*",
+    "@money/shared": "workspace:*",
+    "@opentui/core": "^0.1.39",
+    "@opentui/react": "^0.1.39",
+    "react-native": "^0.82.1",
+    "react-native-opentui": "workspace:*"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.0"
+  }
+}

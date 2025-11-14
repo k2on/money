@@ -2,7 +2,8 @@
   "name": "money",
   "private": true,
   "scripts": {
-    "dev": "process-compose up -p 0"
+    "dev": "process-compose up -p 0",
+    "tui": "bun run --hot apps/tui/src/index.tsx"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

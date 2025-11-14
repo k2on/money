@@ -1,0 +1,14 @@
+{
+  "name": "@money/ui",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "exports": {
+    ".": "./src/index.tsx"
+  },
+  "dependencies": {
+    "react-native-opentui": "workspace:*",
+    "@money/shared": "workspace:*"
+  },
+  "packageManager": "pnpm@10.18.2"
+}

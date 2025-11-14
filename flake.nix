@@ -19,6 +19,7 @@
         packages = with pkgs; [
           corepack
           nodejs_22
+          bun
 
           postgresql
           process-compose

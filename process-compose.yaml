@@ -55,7 +55,7 @@ processes:
 
   studio:
     command: npx drizzle-kit studio
-    working_dir: ./shared
+    working_dir: ./packages/shared
     depends_on:
       db:
         condition: process_healthy

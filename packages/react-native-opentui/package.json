@@ -1,0 +1,11 @@
+{
+  "name": "react-native-opentui",
+  "version": "1.0.0",
+  "main": "index.tsx",
+  "exports": {
+    ".": "./index.tsx"
+  },
+  "peerDependencies": {
+    "react": "*"
+  }
+}
