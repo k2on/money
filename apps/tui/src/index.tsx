@@ -1,6 +1,6 @@
 import { RGBA, TextAttributes, createCliRenderer } from "@opentui/core";
 import { createRoot } from "@opentui/react";
-import { Settings } from "@money/ui";
+import { App } from "@money/ui";
 import { ZeroProvider } from "@rocicorp/zero/react";
 import { schema } from '@money/shared';
 
@@ -11,7 +11,7 @@ const auth = undefined;
 function Main() {
   return (
     <ZeroProvider {...{ userID, auth, server, schema }}>
-      <Settings />
+      <App />
     </ZeroProvider>
   );
 }

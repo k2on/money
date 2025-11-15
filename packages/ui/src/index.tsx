@@ -1,29 +1,31 @@
-import { Table, type Column } from "./table";
-import { useQuery } from "@rocicorp/zero/react";
-import { queries } from '@money/shared';
+import { useState } from "react";
+import { Transactions } from "./transactions";
+import { Text } from "react-native";
+import { Settings } from "./settings";
+import { useKeyboard } from "./useKeyboard";
 
-
-export type Account = {
-  name: string;
-  createdAt: number;
+type Page = "transactions" | "settings";
+type AppProps = {
+  page?: Page;
+  onPageChange?: (page: Page) => void;
 }
 
-const COLUMNS: Column[] = [
-  { name: 'createdAt', label: 'Created At', render: (n) => new Date(n).toDateString() },
-  { name: 'amount', label: 'Amount' },
-  { name: 'name', label: 'Name' },
-];
+export function App({ page, onPageChange }: AppProps) {
+  const [curr, setPage] = useState<Page>(page || "transactions");
 
+  useKeyboard((key) => {
+    if (key.name == "1") {
+      setPage("transactions");
+      if (onPageChange)
+      onPageChange("transactions");
+    } else if (key.name == "2") {
+      setPage("settings");
+      if (onPageChange)
+      onPageChange("settings");
+    }
+  });
 
-export function Settings() {
-  const [items] = useQuery(queries.allTransactions(null));
-
-  return (
-    <Table
-      data={items}
-      columns={COLUMNS}
-    />
-  )
+  return curr == "transactions" ? <Transactions /> : <Settings />;
 }
 
 

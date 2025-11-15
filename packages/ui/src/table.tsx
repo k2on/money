@@ -4,8 +4,8 @@ import { useKeyboard } from "./useKeyboard";
 
 const HEADER_COLOR = '#7158e2';
 const TABLE_COLORS = [
-  '#3c3c3c',
-  '#4b4b4b'
+  '#ddd',
+  '#eee'
 ];
 const SELECTED_COLOR = '#f7b730';
 
@@ -14,14 +14,26 @@ const EXTRA = 5;
 
 export type ValidRecord = Record<string, string | number | null>;
 
-const TableContext = createContext<{ data: unknown[], columns: Column[], columnMap: Map<string, number> }>({
+interface TableState {
+  data: unknown[];
+  columns: Column[];
+  columnMap: Map<string, number>;
+  idx: number;
+  selectedFrom: number | undefined;
+};
+
+
+const INITAL_STATE = {
   data: [],
   columns: [],
   columnMap: new Map(),
-}); 
+  idx: 0,
+  selectedFrom: undefined,
+} satisfies TableState;
+
+export const Context = createContext<TableState>(INITAL_STATE); 
 
 export type Column = { name: string, label: string, render?: (i: number | string) => string };
-
 
 
 function renderCell(row: ValidRecord, column: Column): string {
@@ -33,11 +45,12 @@ function renderCell(row: ValidRecord, column: Column): string {
 }
 
 
-export interface TableProps<T> {
+export interface ProviderProps<T> {
   data: T[];
   columns: Column[];
+  children: ReactNode;
 };
-export function Table<T extends ValidRecord>({ data, columns }: TableProps<T>) {
+export function Provider<T extends ValidRecord>({ data, columns, children }: ProviderProps<T>) {
   const [idx, setIdx] = useState(0);
   const [selectedFrom, setSelectedFrom] = useState<number>();
 
@@ -68,23 +81,31 @@ export function Table<T extends ValidRecord>({ data, columns }: TableProps<T>) {
 
 
   return (
-    <TableContext.Provider value={{ data, columns, columnMap }}>
-      <View>
-        <View style={{ backgroundColor: HEADER_COLOR, flexDirection: 'row' }}>
-          {columns.map(column => <Text key={column.name} style={{ fontFamily: 'mono', color: 'white' }}>{rpad(column.label, columnMap.get(column.name)! - column.label.length + EXTRA)}</Text>)}
-        </View>
-        {data.map((row, index) => {
-          const isSelected = index == idx || (selectedFrom != undefined && ((selectedFrom <= index && index <= idx) || (idx <= index && index <= selectedFrom)))
-
-          return (
-            <View key={index} style={{ backgroundColor: isSelected ? SELECTED_COLOR : TABLE_COLORS[index % 2] }}>
-              <TableRow key={index} row={row} index={index} isSelected={isSelected} />
-            </View>
-          );
-        })}
-      </View>
-    </TableContext.Provider>
+    <Context.Provider value={{ data, columns, columnMap, idx, selectedFrom }}>
+      {children}
+    </Context.Provider>
   );
+}
+
+export function Body() {
+  const { columns, data, columnMap, idx, selectedFrom } = use(Context);
+  return (
+    <View>
+      <View style={{ backgroundColor: HEADER_COLOR, flexDirection: 'row' }}>
+        {columns.map(column => <Text key={column.name} style={{ fontFamily: 'mono', color: 'white' }}>{rpad(column.label, columnMap.get(column.name)! - column.label.length + EXTRA)}</Text>)}
+      </View>
+      {data.map((row, index) => {
+        const isSelected = index == idx || (selectedFrom != undefined && ((selectedFrom <= index && index <= idx) || (idx <= index && index <= selectedFrom)))
+
+        return (
+          <View key={index} style={{ backgroundColor: isSelected ? SELECTED_COLOR : TABLE_COLORS[index % 2] }}>
+            <TableRow key={index} row={row as ValidRecord} index={index} isSelected={isSelected} />
+          </View>
+        );
+      })}
+    </View>
+  )
+
 }
 
 interface RowProps<T> {
@@ -93,13 +114,13 @@ interface RowProps<T> {
   isSelected: boolean;
 }
 function TableRow<T extends ValidRecord>({ row, isSelected }: RowProps<T>) {
-  const { data, columns, columnMap } = use(TableContext);
+  const { data, columns, columnMap } = use(Context);
 
 
   return <View style={{ flexDirection: 'row' }}>
     {columns.map(column => {
       const rendered = renderCell(row, column);
-      return <Text key={column.name} style={{ fontFamily: 'mono', color: isSelected ? 'black' : 'white' }}>{rpad(rendered, columnMap.get(column.name)! - rendered.length + EXTRA)}</Text>;
+      return <Text key={column.name} style={{ fontFamily: 'mono', color: isSelected ? 'black' : 'black' }}>{rpad(rendered, columnMap.get(column.name)! - rendered.length + EXTRA)}</Text>;
     })}
   </View>
 }

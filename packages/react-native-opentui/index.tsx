@@ -14,8 +14,14 @@ export function View({ children, style }: ViewProps) {
     ? style.flexDirection
     : undefined
     : undefined;
+  const flex = style &&
+    'flex' in style
+    ? typeof style.flex == 'number'
+    ? style.flex
+    : undefined
+    : undefined;
 
-  return <box backgroundColor={bg} flexDirection={flexDirection}>{children}</box>
+  return <box backgroundColor={bg} flexDirection={flexDirection} flexGrow={flex}>{children}</box>
 
 }
 
