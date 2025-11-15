@@ -7,8 +7,8 @@
     ".": "./src/index.tsx"
   },
   "dependencies": {
-    "react-native-opentui": "workspace:*",
-    "@money/shared": "workspace:*"
+    "@money/shared": "workspace:*",
+    "react-native-opentui": "workspace:*"
   },
   "packageManager": "pnpm@10.18.2"
 }

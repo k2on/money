@@ -8,7 +8,14 @@ export function View({ children, style }: ViewProps) {
     ? style.backgroundColor
     : undefined
     : undefined;
-  return <box backgroundColor={bg}>{children}</box>
+  const flexDirection = style &&
+    'flexDirection' in style
+    ? typeof style.flexDirection == 'string'
+    ? style.flexDirection
+    : undefined
+    : undefined;
+
+  return <box backgroundColor={bg} flexDirection={flexDirection}>{children}</box>
 
 }
 

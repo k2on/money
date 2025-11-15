@@ -1,15 +1,29 @@
-import { Text } from "react-native";
-import { List } from "./list";
+import { Table, type Column } from "./table";
 import { useQuery } from "@rocicorp/zero/react";
 import { queries } from '@money/shared';
 
-export function Settings() {
-  const [items] = useQuery(queries.getItems(null));
 
-  return <List
-    items={items}
-    renderItem={({ item, isSelected }) => <Text style={{ color: isSelected ? 'white' : 'black' }}>{item.name}</Text>}
-  />
+export type Account = {
+  name: string;
+  createdAt: number;
+}
+
+const COLUMNS: Column[] = [
+  { name: 'createdAt', label: 'Created At', render: (n) => new Date(n).toDateString() },
+  { name: 'amount', label: 'Amount' },
+  { name: 'name', label: 'Name' },
+];
+
+
+export function Settings() {
+  const [items] = useQuery(queries.allTransactions(null));
+
+  return (
+    <Table
+      data={items}
+      columns={COLUMNS}
+    />
+  )
 }
 
 
