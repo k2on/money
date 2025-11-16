@@ -37,7 +37,6 @@ export function useKeyboard(handler: (key: KeyEvent) => void, deps: any[] = []) 
     // @ts-ignore
     window.addEventListener("keydown", handlerWeb);
     return () => {
-      console.log("REMOVING");
     // @ts-ignore
 window.removeEventListener("keydown", handlerWeb);
     };

@@ -1,31 +1,95 @@
-import { useState } from "react";
+import { createContext, use, useState } from "react";
 import { Transactions } from "./transactions";
-import { Text } from "react-native";
+import { View, Text } from "react-native";
 import { Settings } from "./settings";
 import { useKeyboard } from "./useKeyboard";
 
-type Page = "transactions" | "settings";
-type AppProps = {
-  page?: Page;
-  onPageChange?: (page: Page) => void;
+
+const PAGES = {
+  '/': {
+    screen: <Transactions />,
+    key: "1",
+  },
+  '/settings': {
+    screen: <Settings />,
+    key: "2",
+    children: {
+      "/accounts": {},
+      "/family": {},
+    }
+  },
+};
+
+type Join<A extends string, B extends string> =
+  `${A}${B}` extends `${infer X}` ? X : never;
+
+type ChildRoutes<Parent extends string, Children> =
+  {
+    [K in keyof Children & string]:
+      K extends `/${string}`
+        ? Join<Parent, K>
+        : never;
+  }[keyof Children & string];
+
+type Routes<T> = {
+  [K in keyof T & string]:
+    | K
+    | (T[K] extends { children: infer C }
+        ? ChildRoutes<K, C>
+        : never)
+}[keyof T & string];
+
+export type Route = Routes<typeof PAGES>;
+
+type Auth = any;
+
+interface RouterContextType {
+  auth: Auth;
+  route: Route;
+  setRoute: (route: Route) => void;
 }
 
-export function App({ page, onPageChange }: AppProps) {
-  const [curr, setPage] = useState<Page>(page || "transactions");
+
+export const RouterContext = createContext<RouterContextType>({
+  auth: null,
+  route: '/',
+  setRoute: () => {}
+});
+
+
+type AppProps = {
+  auth: Auth;
+  route: Route;
+  setRoute: (page: Route) => void;
+}
+
+export function App({ auth, route, setRoute }: AppProps) {
+  return <RouterContext.Provider value={{ auth, route, setRoute }}>
+    <Main />
+  </RouterContext.Provider>
+}
+
+function Main() {
+  const { route, setRoute } = use(RouterContext);
 
   useKeyboard((key) => {
-    if (key.name == "1") {
-      setPage("transactions");
-      if (onPageChange)
-      onPageChange("transactions");
-    } else if (key.name == "2") {
-      setPage("settings");
-      if (onPageChange)
-      onPageChange("settings");
-    }
+    const screen = Object.entries(PAGES)
+      .find(([, screen]) => screen.key == key.name);
+
+    if (!screen) return;
+
+    const [route] = screen as [Route, never];
+
+    setRoute(route);
   });
 
-  return curr == "transactions" ? <Transactions /> : <Settings />;
+  const match =
+    route in PAGES
+      ? (route as keyof typeof PAGES)
+      : (Object.keys(PAGES).sort((a, b) => b.length - a.length).find(p => route.startsWith(p)) as
+          keyof typeof PAGES);
+
+  return PAGES[match].screen;
 }
 
 

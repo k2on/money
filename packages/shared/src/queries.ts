@@ -12,9 +12,9 @@ export const queries = {
       .one();
   }),
   allTransactions: syncedQueryWithContext('allTransactions', z.tuple([]), (authData: AuthData | null) => {
-    // isLoggedIn(authData);
+    isLoggedIn(authData);
     return builder.transaction
-      // .where('user_id', '=', authData.user.id)
+      .where('user_id', '=', authData.user.id)
       .orderBy('datetime', 'desc')
       .limit(50)
   }),
@@ -32,9 +32,9 @@ export const queries = {
       .orderBy('name', 'asc');
   }),
   getItems: syncedQueryWithContext('getItems', z.tuple([]), (authData: AuthData | null) => {
-    // isLoggedIn(authData);
+    isLoggedIn(authData);
     return builder.plaidAccessTokens
-      // .where('userId', '=', authData.user.id)
+      .where('userId', '=', authData.user.id)
       .orderBy('createdAt', 'desc');
   })
 };

@@ -3,6 +3,7 @@ import { useQuery } from "@rocicorp/zero/react";
 import { queries, type Transaction } from '@money/shared';
 import { use } from "react";
 import { View, Text } from "react-native";
+import { RouterContext } from ".";
 
 
 const FORMAT = new Intl.NumberFormat("en-US", {
@@ -23,7 +24,8 @@ const COLUMNS: Table.Column[] = [
 
 
 export function Transactions() {
-  const [items] = useQuery(queries.allTransactions(null));
+  const { auth } = use(RouterContext);
+  const [items] = useQuery(queries.allTransactions(auth));
 
   return (
     <Table.Provider

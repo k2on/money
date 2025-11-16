@@ -1,17 +1,18 @@
 import { useLocalSearchParams } from "expo-router";
 import { Text } from "react-native";
-import { App } from "@money/ui";
+import { App, type Route } from "@money/ui";
 import { useEffect, useState } from "react";
+import { authClient } from "@/lib/auth-client";
 
 export default function Page() {
   const { route: initalRoute } = useLocalSearchParams<{ route: string[] }>();
-  const [route, setRoute] = useState(initalRoute[0]!);
+  const [route, setRoute] = useState(initalRoute ? "/" + initalRoute.join("/") : "/");
 
-  // detect back/forward
+  const { data } = authClient.useSession();
+
   useEffect(() => {
     const handler = () => {
       const newRoute = window.location.pathname.slice(1);
-      // call your app’s page change logic
       setRoute(newRoute);
     };
 
@@ -21,9 +22,11 @@ export default function Page() {
 
   return (
     <App
-      page={route as any}
-      onPageChange={(page) => {
-        window.history.pushState({}, "", "/" + page);
+      auth={data}
+      route={route as Route}
+      setRoute={(page) => {
+        window.history.pushState({}, "", page);
+        setRoute(page);
       }}
     />
   );
