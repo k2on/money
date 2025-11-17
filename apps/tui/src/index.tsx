@@ -1,28 +1,57 @@
-import { RGBA, TextAttributes, createCliRenderer } from "@opentui/core";
+import { createCliRenderer } from "@opentui/core";
 import { createRoot } from "@opentui/react";
 import { App, type Route } from "@money/ui";
 import { ZeroProvider } from "@rocicorp/zero/react";
 import { schema } from '@money/shared';
-import { useState } from "react";
+import { use, useState } from "react";
+import { writeFileSync, readFileSync, existsSync, rmSync, mkdirSync } from "fs";
+import { join } from "path";
+import { homedir } from "os";
+import { Auth } from "./auth";
+import { AuthContext, type AuthType } from "./auth/context";
 
 const userID = "anon";
 const server = "http://laptop:4848";
-const auth = undefined;
+// const auth = undefined;
 
-function Main() {
+const PATH = join(homedir(), ".local", "share", "money");
+
+function Main({ auth: initalAuth }: { auth: AuthType | null }) {
+  const [auth, setAuth] = useState(initalAuth);
+
   return (
-    <ZeroProvider {...{ userID, auth, server, schema }}>
+    <AuthContext.Provider value={{ auth, setAuth: (auth) => {
+      if (auth) {
+        mkdirSync(PATH, { recursive: true });
+        writeFileSync(PATH + "/auth.json", JSON.stringify(auth));
+        setAuth(auth);
+      } else {
+        rmSync(PATH + "token");
+      }
+    } }}>
+      {auth ? <Authed /> : <Auth />}
+    </AuthContext.Provider>
+  );
+}
+
+
+
+function Authed() {
+  const { auth } = use(AuthContext);
+  return (
+    <ZeroProvider {...{ userID, auth: auth?.token, server, schema }}>
       <Router />
     </ZeroProvider>
   );
 }
 
 function Router() {
+  const { auth } = use(AuthContext);
   const [route, setRoute] = useState<Route>("/");
 
   return (
     <App
-      auth={null}
+      auth={auth?.auth || null}
       route={route}
       setRoute={setRoute}
     />
@@ -30,4 +59,5 @@ function Router() {
 }
 
 const renderer = await createCliRenderer();
-createRoot(renderer).render(<Main />);
+const auth = existsSync(PATH + "/auth.json") ? JSON.parse(readFileSync(PATH + "/auth.json", 'utf8')) as AuthType : null;
+createRoot(renderer).render(<Main auth={auth} />);

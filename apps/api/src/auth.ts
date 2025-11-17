@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { genericOAuth } from "better-auth/plugins";
+import { bearer, deviceAuthorization, genericOAuth } from "better-auth/plugins";
 import { expo } from "@better-auth/expo";
 import { drizzleSchema } from "@money/shared/db";
 import { db } from "./db";
@@ -37,6 +37,8 @@ export const auth = betterAuth({
           scopes: ["profile", "email"],
         }
       ]
-    })
+    }),
+    deviceAuthorization(),
+    bearer(),
   ]
 });

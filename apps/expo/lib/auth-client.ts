@@ -1,5 +1,5 @@
 import { createAuthClient } from "better-auth/react";
-import { genericOAuthClient } from "better-auth/client/plugins";
+import { deviceAuthorizationClient, genericOAuthClient } from "better-auth/client/plugins";
 import { expoClient } from "@better-auth/expo/client";
 import * as SecureStore from "expo-secure-store";
 import { BASE_URL } from "@money/shared";
@@ -13,5 +13,6 @@ export const authClient = createAuthClient({
       storage: SecureStore,
     }),
     genericOAuthClient(),
+    deviceAuthorizationClient(),
   ]
 });

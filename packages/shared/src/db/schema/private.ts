@@ -5,6 +5,7 @@ import {
   text,
   timestamp,
   uniqueIndex,
+  integer,
 } from "drizzle-orm/pg-core";
 import { users } from "./public";
 
@@ -93,3 +94,19 @@ export const auditLogs = pgTable("audit_log", {
   action: text("action").notNull(),
 });
 
+export const deviceCodes = pgTable("deviceCode", {
+  id: text("id").primaryKey(),
+  deviceCode: text("device_code").notNull(),
+  userCode: text("user_code").notNull(),
+  userId: text("user_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
+  clientId: text("client_id"),
+  scope: text("scope"),
+  status: text("status").notNull(),
+  expiresAt: timestamp("expires_at"),
+  lastPolledAt: timestamp("last_polled_at"),
+  pollingInterval: integer("polling_interval"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});

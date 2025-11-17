@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "paths": {
-      "react-native": ["../react-native-opentui"]
+      "react-native": ["../react-native-opentui"],
+      "@/*": ["./*"]
     },
     // Environment setup & latest features
     "lib": ["ESNext"],

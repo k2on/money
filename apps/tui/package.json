@@ -9,10 +9,12 @@
     "react": "*"
   },
   "dependencies": {
-    "@money/ui": "workspace:*",
     "@money/shared": "workspace:*",
+    "@money/ui": "workspace:*",
     "@opentui/core": "^0.1.39",
     "@opentui/react": "^0.1.39",
+    "@types/qrcode": "^1.5.6",
+    "qrcode": "^1.5.4",
     "react-native": "^0.82.1",
     "react-native-opentui": "workspace:*"
   },

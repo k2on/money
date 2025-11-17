@@ -99,6 +99,8 @@ const createMutators = (authData: AuthData | null) => {
           id: randomUUID(),
           userId: authData.user.id,
           token: data.access_token,
+          logoUrl: "",
+          name: ""
         });
       },
 

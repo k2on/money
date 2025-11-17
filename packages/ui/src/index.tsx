@@ -3,6 +3,7 @@ import { Transactions } from "./transactions";
 import { View, Text } from "react-native";
 import { Settings } from "./settings";
 import { useKeyboard } from "./useKeyboard";
+import type { AuthData } from "@money/shared/auth";
 
 
 const PAGES = {
@@ -41,10 +42,8 @@ type Routes<T> = {
 
 export type Route = Routes<typeof PAGES>;
 
-type Auth = any;
-
 interface RouterContextType {
-  auth: Auth;
+  auth: AuthData | null;
   route: Route;
   setRoute: (route: Route) => void;
 }
@@ -58,7 +57,7 @@ export const RouterContext = createContext<RouterContextType>({
 
 
 type AppProps = {
-  auth: Auth;
+  auth: AuthData | null;
   route: Route;
   setRoute: (page: Route) => void;
 }

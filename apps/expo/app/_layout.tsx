@@ -45,6 +45,7 @@ export default function RootLayout() {
       <Stack>
         <Stack.Protected guard={!isPending && !!session}>
           <Stack.Screen name="[...route]" options={{ headerShown: false }} />
+          <Stack.Screen name="approve" />
         </Stack.Protected>
         <Stack.Protected guard={!isPending && !session}>
           <Stack.Screen name="auth" />
