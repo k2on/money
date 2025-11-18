@@ -1,5 +1,5 @@
 import { createCliRenderer } from "@opentui/core";
-import { createRoot } from "@opentui/react";
+import { createRoot, useKeyboard } from "@opentui/react";
 import { App, type Route } from "@money/ui";
 import { ZeroProvider } from "@rocicorp/zero/react";
 import { schema } from '@money/shared';
@@ -9,15 +9,17 @@ import { Effect } from "effect";
 import { BunContext } from "@effect/platform-bun";
 import type { AuthData } from "./schema";
 import { kvStore } from "./store";
-
-const userID = "anon";
-const server = "http://laptop:4848";
+import { config } from "./config";
 
 function Main({ auth }: { auth: AuthData }) {
   const [route, setRoute] = useState<Route>("/");
 
+  useKeyboard(key => {
+    if (key.name == "c" && key.ctrl) process.exit(0);
+  });
+
   return (
-    <ZeroProvider {...{ userID, auth: auth.session.token, server, schema, kvStore }}>
+    <ZeroProvider {...{ userID: auth.user.id, auth: auth.session.token, server: config.zeroUrl, schema, kvStore }}>
       <App
         auth={auth || null}
         route={route}
@@ -35,5 +37,5 @@ const auth = await Effect.runPromise(
     Effect.provide(layer()),
   )
 );
-const renderer = await createCliRenderer();
+const renderer = await createCliRenderer({ exitOnCtrlC: false });
 createRoot(renderer).render(<Main auth={auth} />);

@@ -10,7 +10,9 @@ const CLIENT_ID = "koon-family";
 const getFromFromDisk = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem;
   const content = yield* fs.readFileString(config.authPath);
-  return yield* Schema.decode(Schema.parseJson(AuthState))(content);
+  const auth = yield* Schema.decode(Schema.parseJson(AuthState))(content);
+  if (auth.session.expiresAt < new Date()) yield* Effect.fail("Token expired");
+  return auth;
 });
 
 
@@ -123,10 +125,12 @@ const requestAuth = Effect.gen(function* () {
   }));
   if (sessionData == null) return yield* Effect.fail("Session was null");
 
-  const fs = yield* FileSystem.FileSystem;
-  yield* fs.writeFileString(config.authPath, JSON.stringify(sessionData));
+  const result = yield* Schema.decodeUnknown(AuthState)(sessionData)
 
-  return sessionData;
+  const fs = yield* FileSystem.FileSystem;
+  yield* fs.writeFileString(config.authPath, JSON.stringify(result));
+
+  return result;
 });
 
 export const getAuth = Effect.gen(function* () {
