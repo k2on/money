@@ -8,4 +8,5 @@ export const config = {
   dir: PATH,
   authPath: AUTH_PATH,
   zeroUrl: "http://laptop:4848",
+  apiUrl: "http://laptop:3000"
 };

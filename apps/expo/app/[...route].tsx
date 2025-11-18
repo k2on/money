@@ -1,5 +1,4 @@
 import { useLocalSearchParams } from "expo-router";
-import { Text } from "react-native";
 import { App, type Route } from "@money/ui";
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
