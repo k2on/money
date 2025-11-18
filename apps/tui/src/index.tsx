@@ -4,10 +4,11 @@ import { App, type Route } from "@money/ui";
 import { ZeroProvider } from "@rocicorp/zero/react";
 import { schema } from '@money/shared';
 import { useState } from "react";
-import { AuthClient, getAuth, layer } from "./auth";
-import { Effect, Layer } from "effect";
+import { getAuth, layer } from "./auth";
+import { Effect } from "effect";
 import { BunContext } from "@effect/platform-bun";
 import type { AuthData } from "./schema";
+import { kvStore } from "./store";
 
 const userID = "anon";
 const server = "http://laptop:4848";
@@ -16,7 +17,7 @@ function Main({ auth }: { auth: AuthData }) {
   const [route, setRoute] = useState<Route>("/");
 
   return (
-    <ZeroProvider {...{ userID, auth: auth.session.token, server, schema }}>
+    <ZeroProvider {...{ userID, auth: auth.session.token, server, schema, kvStore }}>
       <App
         auth={auth || null}
         route={route}
