@@ -7,10 +7,6 @@ type StoreProvider = ZeroOptions<any>["kvStore"];
 
 const DATA_DIR = config.dir;
 
-// async function ensureDir() {
-//   await fs.mkdir(DATA_DIR, { recursive: true });
-// }
-//
 function deepFreeze<T>(obj: T): T {
   if (obj && typeof obj === "object" && !Object.isFrozen(obj)) {
     Object.freeze(obj);
@@ -22,7 +18,6 @@ function deepFreeze<T>(obj: T): T {
 }
 
 async function loadFile(name: string): Promise<Map<string, ReadonlyJSONValue>> {
-  // await ensureDir();
   const filePath = path.join(DATA_DIR, `${name}.json`);
   try {
     const buf = await fs.readFile(filePath, "utf8");
@@ -40,7 +35,6 @@ async function loadFile(name: string): Promise<Map<string, ReadonlyJSONValue>> {
 }
 
 async function saveFile(name: string, data: Map<string, ReadonlyJSONValue>) {
-  // await ensureDir();
   const filePath = path.join(DATA_DIR, `${name}.json`);
   const obj = Object.fromEntries(data.entries());
   await fs.writeFile(filePath, JSON.stringify(obj, null, 2), "utf8");
@@ -128,7 +122,6 @@ export const kvStore: StoreProvider = {
   },
 
   async drop(name: string) {
-    // await ensureDir();
     const filePath = path.join(DATA_DIR, `${name}.json`);
     await fs.rm(filePath, { force: true });
     console.log("destroy db:", name);
