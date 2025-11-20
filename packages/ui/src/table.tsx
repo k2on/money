@@ -1,5 +1,5 @@
 import { createContext, use, useState, type ReactNode } from "react";
-import { View, Text } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import { useKeyboard } from "./useKeyboard";
 
 const HEADER_COLOR = '#7158e2';
@@ -94,15 +94,15 @@ export function Body() {
       <View style={{ backgroundColor: HEADER_COLOR, flexDirection: 'row' }}>
         {columns.map(column => <Text key={column.name} style={{ fontFamily: 'mono', color: 'white' }}>{rpad(column.label, columnMap.get(column.name)! - column.label.length + EXTRA)}</Text>)}
       </View>
-      {data.map((row, index) => {
-        const isSelected = index == idx || (selectedFrom != undefined && ((selectedFrom <= index && index <= idx) || (idx <= index && index <= selectedFrom)))
+        {data.map((row, index) => {
+          const isSelected = index == idx || (selectedFrom != undefined && ((selectedFrom <= index && index <= idx) || (idx <= index && index <= selectedFrom)))
 
-        return (
-          <View key={index} style={{ backgroundColor: isSelected ? SELECTED_COLOR : TABLE_COLORS[index % 2] }}>
-            <TableRow key={index} row={row as ValidRecord} index={index} isSelected={isSelected} />
-          </View>
-        );
-      })}
+          return (
+            <View key={index} style={{ backgroundColor: isSelected ? SELECTED_COLOR : TABLE_COLORS[index % 2] }}>
+              <TableRow key={index} row={row as ValidRecord} index={index} isSelected={isSelected} />
+            </View>
+          );
+        })}
     </View>
   )
 

@@ -7,6 +7,8 @@ const AUTH_PATH = join(PATH, "auth.json");
 export const config = {
   dir: PATH,
   authPath: AUTH_PATH,
+  authClientId: "koon-family",
+  authClientUserAgent: "CLI",
   zeroUrl: "http://laptop:4848",
   apiUrl: "http://laptop:3000"
 };

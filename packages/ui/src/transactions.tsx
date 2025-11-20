@@ -2,7 +2,7 @@ import * as Table from "./table";
 import { useQuery } from "@rocicorp/zero/react";
 import { queries, type Transaction } from '@money/shared';
 import { use } from "react";
-import { View, Text } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import { RouterContext } from ".";
 
 
@@ -28,13 +28,15 @@ export function Transactions() {
   const [items] = useQuery(queries.allTransactions(auth));
 
   return (
-    <Table.Provider
-      data={items}
-      columns={COLUMNS} >
-        <Table.Body />
-        {/* Spacer */}
-        <View style={{ flex: 1 }} />
-      <Selected />
+    <Table.Provider data={items} columns={COLUMNS}>
+      <View style={{ flex: 1 }}>
+        <View style={{ flexShrink: 0}}>
+          <Table.Body />
+        </View>
+      </View>
+      <View style={{ flexShrink: 0 }}>
+        <Selected />
+      </View>
     </Table.Provider>
   )
 }

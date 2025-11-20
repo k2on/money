@@ -1,25 +1,17 @@
-import { Context, Data, Effect, Layer, Schema, Console, Schedule, Match, Ref, Duration } from "effect";
+import { Context, Data, Effect, Layer, Schema, Console, Schedule, Ref, Duration } from "effect";
 import { FileSystem } from "@effect/platform";
 import { config } from "./config";
 import { AuthState } from "./schema";
 import { authClient } from "@/lib/auth-client";
 import type { BetterFetchResponse } from "@better-fetch/fetch";
 
-const CLIENT_ID = "koon-family";
-
-const getFromFromDisk = Effect.gen(function* () {
-  const fs = yield* FileSystem.FileSystem;
-  const content = yield* fs.readFileString(config.authPath);
-  const auth = yield* Schema.decode(Schema.parseJson(AuthState))(content);
-  if (auth.session.expiresAt < new Date()) yield* Effect.fail("Token expired");
-  return auth;
-});
-
-
-class AuthClientErrorString extends Data.TaggedError("AuthClientErrorString")<{
-  errorString: string,
+class AuthClientUnknownError extends Data.TaggedError("AuthClientUnknownError") {};
+class AuthClientExpiredToken extends Data.TaggedError("AuthClientExpiredToken") {};
+class AuthClientNoData extends Data.TaggedError("AuthClientNoData") {};
+class AuthClientFetchError extends Data.TaggedError("AuthClientFetchError")<{ message: string, }> {};
+class AuthClientError<T> extends Data.TaggedError("AuthClientError")<{
+  error: T,
 }> {};
-
 
 type ErrorType<E> = { [key in keyof ((E extends Record<string, any> ? E : {
     message?: string;
@@ -33,16 +25,12 @@ type ErrorType<E> = { [key in keyof ((E extends Record<string, any> ? E : {
     statusText: string;
 })[key]; };
 
-class AuthClientError<T> extends Data.TaggedError("AuthClientError")<{
-  error: T,
-}> {};
-
 export class AuthClient extends Context.Tag("AuthClient")<AuthClient, AuthClientImpl>() {};
 
 export interface AuthClientImpl {
   use: <T, E>(
     fn: (client: typeof authClient) => Promise<BetterFetchResponse<T, E>>,
-  ) => Effect.Effect<T, AuthClientError<ErrorType<E>> | AuthClientErrorString, never>
+  ) => Effect.Effect<T, AuthClientError<ErrorType<E>> | AuthClientFetchError | AuthClientUnknownError | AuthClientNoData, never>
 }
 
 
@@ -53,16 +41,18 @@ export const make = () =>
         Effect.gen(function* () {
           const { data, error } = yield* Effect.tryPromise({
             try: () => fn(authClient),
-            catch: () => new AuthClientErrorString({ errorString: "Bad" }),
+            catch: (error) => error instanceof Error
+              ? new AuthClientFetchError({ message: error.message })
+              : new AuthClientUnknownError()
           });
           if (error != null) return yield* Effect.fail(new AuthClientError({ error }));
-          if (data == null) return yield* Effect.fail(new AuthClientErrorString({  errorString: "No data" }));
+          if (data == null) return yield* Effect.fail(new AuthClientNoData());
           return data;
-        })
-    })
-  })
+        }),
+    });
+  });
 
-export const layer = () => Layer.scoped(AuthClient, make());
+export const AuthClientLayer = Layer.scoped(AuthClient, make());
 
 const pollToken = ({ device_code }: { device_code: string }) => Effect.gen(function* () {
   const auth = yield* AuthClient;
@@ -74,8 +64,8 @@ const pollToken = ({ device_code }: { device_code: string }) => Effect.gen(funct
     return client.device.token({
       grant_type: "urn:ietf:params:oauth:grant-type:device_code",
       device_code,
-      client_id: CLIENT_ID,
-      fetchOptions: { headers: { "user-agent": "CLI" } },
+      client_id: config.authClientId,
+      fetchOptions: { headers: { "user-agent": config.authClientUserAgent } },
     })
   }
   );
@@ -104,10 +94,18 @@ const pollToken = ({ device_code }: { device_code: string }) => Effect.gen(funct
 
 });
 
+const getFromFromDisk = Effect.gen(function* () {
+  const fs = yield* FileSystem.FileSystem;
+  const content = yield* fs.readFileString(config.authPath);
+  const auth = yield* Schema.decode(Schema.parseJson(AuthState))(content);
+  if (auth.session.expiresAt < new Date()) yield* Effect.fail(new AuthClientExpiredToken());
+  return auth;
+});
+
 const requestAuth = Effect.gen(function* () {
   const auth = yield* AuthClient;
   const { device_code, user_code } = yield* auth.use(client => client.device.code({
-    client_id: CLIENT_ID,
+    client_id: config.authClientId,
     scope: "openid profile email",
   }));
 
@@ -123,7 +121,7 @@ const requestAuth = Effect.gen(function* () {
       }
     }
   }));
-  if (sessionData == null) return yield* Effect.fail("Session was null");
+  if (sessionData == null) return yield* Effect.fail(new AuthClientNoData());
 
   const result = yield* Schema.decodeUnknown(AuthState)(sessionData)
 
@@ -135,6 +133,34 @@ const requestAuth = Effect.gen(function* () {
 
 export const getAuth = Effect.gen(function* () {
   return yield* getFromFromDisk.pipe(
-    Effect.catchAll(() => requestAuth)
+    Effect.catchAll(() => requestAuth),
+    Effect.catchTag("AuthClientFetchError", (err) => Effect.gen(function* () {
+      yield* Console.error("Authentication failed: " + err.message);
+      process.exit(1);
+    })),
+    Effect.catchTag("AuthClientNoData", () => Effect.gen(function* () {
+      yield* Console.error("Authentication failed: No error and no data was given by the auth server.");
+      process.exit(1);
+    })),
+    Effect.catchTag("ParseError", (err) => Effect.gen(function* () {
+      yield* Console.error("Authentication failed: Auth data failed: " + err.toString());
+      process.exit(1);
+    })),
+    Effect.catchTag("BadArgument", () => Effect.gen(function* () {
+      yield* Console.error("Authentication failed: Bad argument");
+      process.exit(1);
+    })),
+    Effect.catchTag("SystemError", () => Effect.gen(function* () {
+      yield* Console.error("Authentication failed: System error");
+      process.exit(1);
+    })),
+    Effect.catchTag("AuthClientError", ({ error }) => Effect.gen(function* () {
+      yield* Console.error("Authentication error: " + error.statusText);
+      process.exit(1);
+    })),
+    Effect.catchTag("AuthClientUnknownError", () => Effect.gen(function* () {
+      yield* Console.error("Unknown authentication error");
+      process.exit(1);
+    })),
   );
 });

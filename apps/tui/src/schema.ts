@@ -1,10 +1,12 @@
 import { Schema } from "effect";
 
+const DateFromDateOrString = Schema.Union(Schema.DateFromString, Schema.DateFromSelf);
+
 const SessionSchema = Schema.Struct({
-  expiresAt: Schema.DateFromString,
+  expiresAt: DateFromDateOrString,
   token: Schema.String,
-  createdAt: Schema.DateFromString,
-  updatedAt: Schema.DateFromString,
+  createdAt: DateFromDateOrString,
+  updatedAt: DateFromDateOrString,
   ipAddress: Schema.optional(Schema.NullishOr(Schema.String)),
   userAgent: Schema.optional(Schema.NullishOr(Schema.String)),
   userId: Schema.String,
@@ -16,8 +18,8 @@ const UserSchema = Schema.Struct({
   email: Schema.String,
   emailVerified: Schema.Boolean,
   image: Schema.optional(Schema.NullishOr(Schema.String)),
-  createdAt: Schema.DateFromString,
-  updatedAt: Schema.DateFromString,
+  createdAt: DateFromDateOrString,
+  updatedAt: DateFromDateOrString,
   id: Schema.String,
 });
 

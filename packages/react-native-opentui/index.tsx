@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { ViewProps, TextProps, PressableProps } from "react-native";
+import type { ViewProps, TextProps, PressableProps, ScrollViewProps } from "react-native";
 
 export function View({ children, style }: ViewProps) {
   const bg = style &&
@@ -20,8 +20,26 @@ export function View({ children, style }: ViewProps) {
     ? style.flex
     : undefined
     : undefined;
+  const flexShrink = style &&
+    'flexShrink' in style
+    ? typeof style.flexShrink == 'number'
+    ? style.flexShrink
+    : undefined
+    : undefined;
+  const overflow = style &&
+    'overflow' in style
+    ? typeof style.overflow == 'string'
+    ? style.overflow
+    : undefined
+    : undefined;
 
-  return <box backgroundColor={bg} flexDirection={flexDirection} flexGrow={flex}>{children}</box>
+  return <box
+    backgroundColor={bg}
+    flexDirection={flexDirection}
+    flexGrow={flex}
+    overflow={overflow}
+    flexShrink={flexShrink}
+  >{children}</box>
 }
 
 export function Pressable({ children: childrenRaw, style, onPress }: PressableProps) {
@@ -67,6 +85,10 @@ export function Text({ style, children }: TextProps) {
     : undefined;
   return <text fg={fg || "black"}>{children}</text>
 
+}
+
+export function ScrollView({ children }: ScrollViewProps) {
+  return <scrollbox >{children}</scrollbox>
 }
 
 export const Platform = {
