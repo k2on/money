@@ -43,6 +43,7 @@ export const balance = pgTable("balance", {
   avaliable: decimal("avaliable").notNull(),
   current: decimal("current").notNull(),
   name: text("name").notNull(),
+  tokenId: text("tokenId").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

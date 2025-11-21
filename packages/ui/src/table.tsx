@@ -1,6 +1,7 @@
 import { createContext, use, useState, type ReactNode } from "react";
 import { View, Text, ScrollView } from "react-native";
 import { useKeyboard } from "./useKeyboard";
+import type { KeyEvent } from "@opentui/core";
 
 const HEADER_COLOR = '#7158e2';
 const TABLE_COLORS = [
@@ -49,8 +50,9 @@ export interface ProviderProps<T> {
   data: T[];
   columns: Column[];
   children: ReactNode;
+  onKey?: (event: KeyEvent, selected: T[]) => void;
 };
-export function Provider<T extends ValidRecord>({ data, columns, children }: ProviderProps<T>) {
+export function Provider<T extends ValidRecord>({ data, columns, children, onKey }: ProviderProps<T>) {
   const [idx, setIdx] = useState(0);
   const [selectedFrom, setSelectedFrom] = useState<number>();
 
@@ -71,8 +73,13 @@ export function Provider<T extends ValidRecord>({ data, columns, children }: Pro
       setSelectedFrom(idx);
     } else if (key.name == 'escape') {
       setSelectedFrom(undefined);
+    } else {
+      const from = selectedFrom ? Math.min(idx, selectedFrom) : idx;
+      const to = selectedFrom ? Math.max(idx, selectedFrom) : idx;
+      const selected = data.slice(from, to + 1);
+      if (onKey) onKey(key, selected);
     }
-  }, [data, idx]);
+  }, [data, idx, selectedFrom]);
 
 
   const columnMap = new Map(columns.map(col => {

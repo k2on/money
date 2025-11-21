@@ -5,20 +5,21 @@ import { General } from "./settings/general";
 import { Accounts } from "./settings/accounts";
 import { Family } from "./settings/family";
 import { useKeyboard } from "./useKeyboard";
+import { Modal } from "react-native-opentui";
 
 type SettingsRoute = Extract<Route, `/settings${string}`>;
 
 const TABS = {
   "/settings": {
-    label: "General",
+    label: "💽 General",
     screen: <General />
   },
   "/settings/accounts": {
-    label: "Bank Accounts",
+    label: "🏦 Bank Accounts",
     screen: <Accounts />
   },
   "/settings/family": {
-    label: "Family",
+    label: "👑 Family",
     screen: <Family />
   },
 } as const satisfies Record<SettingsRoute, { label: string, screen: ReactNode }>;
@@ -47,13 +48,13 @@ export function Settings() {
   return (
     <View style={{ flexDirection: "row" }}>
 
-      <View>
+      <View style={{ padding: 10 }}>
         {Object.entries(TABS).map(([tabRoute, tab]) => {
           const isSelected = tabRoute == route;
 
           return (
             <Pressable key={tab.label} style={{ backgroundColor: isSelected ? 'black' : undefined }} onPress={() => setRoute(tabRoute as SettingsRoute)}>
-              <Text style={{ fontFamily: 'mono', color: isSelected ? 'white' : 'black' }}>{tab.label}</Text>
+              <Text style={{ fontFamily: 'mono', color: isSelected ? 'white' : 'black' }}>  {tab.label}  </Text>
             </Pressable>
           );
         })}

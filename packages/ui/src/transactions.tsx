@@ -2,7 +2,7 @@ import * as Table from "./table";
 import { useQuery } from "@rocicorp/zero/react";
 import { queries, type Transaction } from '@money/shared';
 import { use } from "react";
-import { View, Text, ScrollView } from "react-native";
+import { View, Text } from "react-native";
 import { RouterContext } from ".";
 
 

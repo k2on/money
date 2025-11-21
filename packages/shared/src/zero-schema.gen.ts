@@ -80,6 +80,15 @@ export const schema = {
             "name"
           >,
         },
+        tokenId: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "balance",
+            "tokenId"
+          >,
+        },
         createdAt: {
           type: "number",
           optional: true,

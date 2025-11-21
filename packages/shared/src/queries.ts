@@ -22,6 +22,7 @@ export const queries = {
     isLoggedIn(authData);
     return builder.plaidLink
       .where('user_id', '=', authData.user.id)
+      .where('createdAt', '<', new Date().getTime() + (1000 * 60 * 60 * 4))
       .orderBy('createdAt', 'desc')
       .one();
   }),

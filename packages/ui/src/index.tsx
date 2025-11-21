@@ -88,7 +88,9 @@ function Main() {
       : (Object.keys(PAGES).sort((a, b) => b.length - a.length).find(p => route.startsWith(p)) as
           keyof typeof PAGES);
 
-  return PAGES[match].screen;
+  return <View style={{ backgroundColor: 'white', flex: 1 }}>
+    {PAGES[match].screen}
+  </View>
 }
 
 

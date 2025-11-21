@@ -31,6 +31,7 @@ export function useKeyboard(handler: (key: KeyEvent) => void, deps: any[] = []) 
         capsLock: false,
         numLock: false,
         baseCode: event.keyCode,
+        preventDefault: () => event.preventDefault(),
       });
     };
 
