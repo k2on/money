@@ -1,6 +1,7 @@
 import type { Transaction } from "@rocicorp/zero";
 import type { AuthData } from "./auth";
-import { isLoggedIn, type Schema } from ".";
+import { type Schema } from "./zero-schema.gen";
+import { isLoggedIn } from "./zql";
 
 type Tx = Transaction<Schema>;
 

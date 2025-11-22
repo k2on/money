@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { View, Text } from "react-native";
-import { useKeyboard } from "./useKeyboard";
+import { useKeyboard } from "../src/useKeyboard";
 
 export type ListProps<T> = {
   items: T[],

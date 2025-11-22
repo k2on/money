@@ -1,6 +1,6 @@
 import { type ReactNode } from "react";
-import { Modal, View, Text, Pressable } from "react-native";
-import { useKeyboard } from "./useKeyboard";
+import { Modal, View, Text } from "react-native";
+import { useKeyboard } from "../src/useKeyboard";
 
 interface ProviderProps {
   children: ReactNode;
@@ -18,7 +18,7 @@ export function Provider({ children, visible, close }: ProviderProps) {
     <Modal transparent visible={visible} >
       {/* <Pressable onPress={() => close && close()} style={{ justifyContent: 'center', alignItems: 'center', flex: 1, backgroundColor: 'rgba(0,0,0,0.2)',  }}> */}
       <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1, backgroundColor: 'rgba(0,0,0,0.2)',  }}>
-        {children}
+        {visible && children}
       </View>
     </Modal>
   );

@@ -168,6 +168,7 @@ const createMutators = (authData: AuthData | null) => {
             avaliable: bal.balances.available as any,
             current: bal.balances.current as any,
             name: bal.name,
+            tokenId: account.id,
           }))).onConflictDoUpdate({
             target: balance.plaid_id,
             set: { current: sql.raw(`excluded.${balance.current.name}`), avaliable: sql.raw(`excluded.${balance.avaliable.name}`) }

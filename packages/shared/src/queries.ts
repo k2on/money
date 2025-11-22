@@ -1,6 +1,6 @@
 import { syncedQueryWithContext } from "@rocicorp/zero";
 import { z } from "zod";
-import { builder } from ".";
+import { builder } from "./zero-schema.gen";
 import { type AuthData } from "./auth";
 import { isLoggedIn } from "./zql";
 
@@ -22,7 +22,7 @@ export const queries = {
     isLoggedIn(authData);
     return builder.plaidLink
       .where('user_id', '=', authData.user.id)
-      .where('createdAt', '<', new Date().getTime() + (1000 * 60 * 60 * 4))
+      .where('createdAt', '>', new Date().getTime() - (1000 * 60 * 60 * 4))
       .orderBy('createdAt', 'desc')
       .one();
   }),

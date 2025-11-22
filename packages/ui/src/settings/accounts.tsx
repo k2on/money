@@ -1,12 +1,12 @@
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import { queries, type Mutators, type Schema } from '@money/shared';
-import * as Table from "../table";
 import { use, useEffect, useState } from "react";
 import { RouterContext } from "..";
-import { View, Text, Modal, Linking } from "react-native";
-import { Button } from "../../components/Button";
+import { View, Text, Linking } from "react-native";
 import { useKeyboard } from "../useKeyboard";
-import * as Dialog from "../dialog";
+import { Button } from "../../components/Button";
+import * as Table from "../../components/Table";
+import * as Dialog from "../../components/Dialog";
 
 const COLUMNS: Table.Column[] = [
   { name: 'name', label: 'Name' },
@@ -18,25 +18,17 @@ export function Accounts() {
   const [items] = useQuery(queries.getItems(auth));
   const [deleting, setDeleting] = useState<typeof items>([]);
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const [link] = useQuery(queries.getPlaidLink(auth));
-  const [loadingLink, setLoadingLink] = useState(false);
 
   const z = useZero<Schema, Mutators>();
 
-  
-  useKeyboard((key) => {
-    if (key.name == 'n') {
-      setDeleting([]);
-    } else if (key.name == 'y') {
-      onDelete();
-    }
-  }, [deleting]);
 
-  useKeyboard((key) => {
-    if (key.name == 'a') {
-      addAccount();
-    }
-  }, [link])
+  // useKeyboard((key) => {
+  //   if (key.name == 'n') {
+  //     setDeleting([]);
+  //   } else if (key.name == 'y') {
+  //     onDelete();
+  //   }
+  // }, [deleting]);
 
   const onDelete = () => {
     if (!deleting) return
@@ -46,31 +38,8 @@ export function Accounts() {
   }
 
   const addAccount = () => {
-    if (link) {
-      Linking.openURL(link.link);
-    } else {
-      setLoadingLink(true);
-      z.mutate.link.create();
-    }
-
-    // else {
-    //   setLoadingLink(true);
-    //   z.mutate.link.create().server.then(async () => {
-    //     const link = await queries.getPlaidLink(auth).run();
-    //     setLoadingLink(false);
-    //     if (link) {
-    //       Linking.openURL(link.link);
-    //     }
-    //   });
-    // }
+    setIsAddOpen(true);
   }
-
-  useEffect(() => {
-    if (loadingLink && link) {
-      Linking.openURL(link.link);
-      setLoadingLink(false);
-    }
-  }, [link, loadingLink]);
 
   return (
     <>
@@ -101,17 +70,18 @@ export function Accounts() {
 
 
 
-      {/* <Dialog.Provider visible={isAddOpen} close={() => setIsAddOpen(false)}> */}
-      {/*   <Dialog.Content> */}
-      {/*     <Text style={{ fontFamily: 'mono' }}>Add Account</Text> */}
-      {/**/}
-      {/*     <AddAccount /> */}
-      {/*   </Dialog.Content> */}
-      {/* </Dialog.Provider> */}
+      <Dialog.Provider visible={isAddOpen} close={() => setIsAddOpen(false)}>
+        <Dialog.Content>
+          <Text style={{ fontFamily: 'mono' }}>Add Account</Text>
+          <AddAccount />
+        </Dialog.Content>
+      </Dialog.Provider>
 
       <View style={{ padding: 10 }}>
 
-        <Button onPress={addAccount}>{loadingLink ? "Loading..." : "Add Account (a)"}</Button>
+        <View style={{ alignSelf: "flex-start" }}>
+          <Button shortcut="a" onPress={addAccount}>Add Account</Button>
+        </View>
 
         <Text style={{ fontFamily: 'mono' }}> </Text>
 
@@ -130,9 +100,31 @@ export function Accounts() {
 
 function AddAccount() {
   const { auth } = use(RouterContext);
-  const [link] = useQuery(queries.getPlaidLink(auth));
+  const [link, details] = useQuery(queries.getPlaidLink(auth));
+
+  const openLink = () => {
+    if (!link) return
+    Linking.openURL(link.link);
+  }
+
+  const z = useZero<Schema, Mutators>();
+
+  useEffect(() => {
+    console.log(link, details);
+    if (details.type != "complete") return;
+    if (link != undefined) return;
+
+    console.log("Creating new link");
+    z.mutate.link.create();
+  }, [link, details]);
 
   return (
-    <Text style={{ fontFamily: 'mono' }}>{link?.link}</Text>
+    <>
+      {link ? <>
+        <Text style={{ fontFamily: 'mono' }}>Please click the button to complete setup.</Text>
+
+        <Button shortcut="return" onPress={openLink}>Open Plaid</Button>
+      </> : <Text style={{ fontFamily: 'mono' }}>Loading Plaid Link</Text>}
+    </>
   );
 }

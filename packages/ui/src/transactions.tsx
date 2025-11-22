@@ -1,4 +1,4 @@
-import * as Table from "./table";
+import * as Table from "../components/Table";
 import { useQuery } from "@rocicorp/zero/react";
 import { queries, type Transaction } from '@money/shared';
 import { use } from "react";

@@ -41,7 +41,10 @@ processes:
     command: |
       createdb -h localhost -p 5432 -U postgres money 2>/dev/null || true
 
-      psql -h localhost -p 5432 -U postgres -c "ALTER SYSTEM SET wal_level = 'logical';"
+      psql -h localhost -p 5432 -U postgres \
+        -c "ALTER SYSTEM SET wal_level = 'logical';" \
+        -c "ALTER SYSTEM SET timezone = 'UTC'" \
+        -c "SELECT pg_reload_conf();"
 
       echo "Migration and seeding complete!"
     depends_on:

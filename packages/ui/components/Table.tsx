@@ -1,6 +1,6 @@
 import { createContext, use, useState, type ReactNode } from "react";
-import { View, Text, ScrollView } from "react-native";
-import { useKeyboard } from "./useKeyboard";
+import { View, Text } from "react-native";
+import { useKeyboard } from "../src/useKeyboard";
 import type { KeyEvent } from "@opentui/core";
 
 const HEADER_COLOR = '#7158e2';
@@ -121,7 +121,7 @@ interface RowProps<T> {
   isSelected: boolean;
 }
 function TableRow<T extends ValidRecord>({ row, isSelected }: RowProps<T>) {
-  const { data, columns, columnMap } = use(Context);
+  const { columns, columnMap } = use(Context);
 
 
   return <View style={{ flexDirection: 'row' }}>

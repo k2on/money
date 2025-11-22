@@ -1,4 +1,4 @@
-import { createContext, use, useState } from "react";
+import { createContext, use } from "react";
 import { Transactions } from "./transactions";
 import { View, Text } from "react-native";
 import { Settings } from "./settings";
