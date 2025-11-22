@@ -5,6 +5,7 @@ import { cors } from "hono/cors";
 import { auth } from "./auth";
 import { getHono } from "./hono";
 import { zero } from "./zero";
+import { webhook } from "./webhook";
 
 const app = getHono();
 
@@ -43,6 +44,7 @@ app.use("*", async (c, next) => {
 app.route("/api/zero", zero);
 
 app.get("/api", (c) => c.text("OK"));
+app.get("/api/webhook_receiver", webhook);
 app.get("/", (c) => c.text("OK"));
 
 serve(

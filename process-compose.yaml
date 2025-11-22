@@ -62,3 +62,6 @@ processes:
     depends_on:
       db:
         condition: process_healthy
+
+  tunnel:
+    command: cloudflared tunnel --config ~/.cloudflared/config.yml run

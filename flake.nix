@@ -23,6 +23,7 @@
 
           postgresql
           process-compose
+          cloudflared
         ];
       };
     });

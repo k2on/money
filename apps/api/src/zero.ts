@@ -25,19 +25,7 @@ import { randomUUID } from "crypto";
 import { db } from "./db";
 import { balance, plaidAccessTokens, plaidLink, transaction } from "@money/shared/db";
 import { eq, inArray, sql, type InferInsertModel } from "drizzle-orm";
-
-
-const configuration = new Configuration({
-  basePath: process.env.PLAID_ENV == 'production' ? PlaidEnvironments.production : PlaidEnvironments.sandbox,
-  baseOptions: {
-    headers: {
-      'PLAID-CLIENT-ID': process.env.PLAID_CLIENT_ID,
-      'PLAID-SECRET': process.env.PLAID_SECRET,
-    }
-  }
-});
-const plaidClient = new PlaidApi(configuration);
-
+import { plaidClient } from "./plaid";
 
 const processor = new PushProcessor(
   new ZQLDatabase(
@@ -56,7 +44,6 @@ const createMutators = (authData: AuthData | null) => {
       ...mutators.link,
       async create() {
         isLoggedIn(authData);
-        console.log("Creating Link token");
         const r = await plaidClient.linkTokenCreate({
           user: {
             client_user_id: authData.user.id,
@@ -65,9 +52,9 @@ const createMutators = (authData: AuthData | null) => {
           language: "en",
           products: [Products.Transactions],
           country_codes: [CountryCode.Us],
+          webhook: "https://webhooks.koon.us/api/webhook_receiver",
           hosted_link: {}
         });
-        console.log("Result", r);
         const { link_token, hosted_link_url } = r.data;
 
         if (!hosted_link_url) throw Error("No link in response");
