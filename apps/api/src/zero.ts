@@ -8,8 +8,8 @@ import {
   PushProcessor,
   ZQLDatabase,
 } from "@rocicorp/zero/server";
-import { PostgresJSConnection } from '@rocicorp/zero/pg';
-import postgres from 'postgres';
+import { PostgresJSConnection } from "@rocicorp/zero/pg";
+import postgres from "postgres";
 import {
   createMutators as createMutatorsShared,
   isLoggedIn,
@@ -20,11 +20,22 @@ import {
 } from "@money/shared";
 import type { AuthData } from "@money/shared/auth";
 import { getHono } from "./hono";
-import { Configuration, CountryCode, PlaidApi, PlaidEnvironments, Products } from "plaid";
+import {
+  Configuration,
+  CountryCode,
+  PlaidApi,
+  PlaidEnvironments,
+  Products,
+} from "plaid";
 import { randomUUID } from "crypto";
 import { db } from "./db";
-import { balance, plaidAccessTokens, plaidLink, transaction } from "@money/shared/db";
-import { eq, inArray, sql, type InferInsertModel } from "drizzle-orm";
+import {
+  balance,
+  plaidAccessTokens,
+  plaidLink,
+  transaction,
+} from "@money/shared/db";
+import { and, eq, inArray, sql, type InferInsertModel } from "drizzle-orm";
 import { plaidClient } from "./plaid";
 
 const processor = new PushProcessor(
@@ -53,7 +64,7 @@ const createMutators = (authData: AuthData | null) => {
           products: [Products.Transactions],
           country_codes: [CountryCode.Us],
           webhook: "https://webhooks.koon.us/api/webhook_receiver",
-          hosted_link: {}
+          hosted_link: {},
         });
         const { link_token, hosted_link_url } = r.data;
 
@@ -70,25 +81,52 @@ const createMutators = (authData: AuthData | null) => {
       async get(_, { link_token }) {
         isLoggedIn(authData);
 
-        const linkResp = await plaidClient.linkTokenGet({
-          link_token,
-        });
-        if (!linkResp) throw Error("No link respo");
-        console.log(JSON.stringify(linkResp.data, null, 4));
-        const publicToken = linkResp.data.link_sessions?.at(0)?.results?.item_add_results.at(0)?.public_token;
+        try {
+          const token = await db.query.plaidLink.findFirst({
+            where: and(
+              eq(plaidLink.token, link_token),
+              eq(plaidLink.user_id, authData.user.id),
+            ),
+          });
+          if (!token) throw Error("Link not found");
+          if (token.completeAt) return;
 
-        if (!publicToken) throw Error("No public token");
-        const { data } = await plaidClient.itemPublicTokenExchange({
-          public_token: publicToken,
-        })
+          const linkResp = await plaidClient.linkTokenGet({
+            link_token,
+          });
+          if (!linkResp) throw Error("No link respo");
 
-        await db.insert(plaidAccessTokens).values({
-          id: randomUUID(),
-          userId: authData.user.id,
-          token: data.access_token,
-          logoUrl: "",
-          name: ""
-        });
+          console.log(JSON.stringify(linkResp.data, null, 4));
+
+          const item_add_result = linkResp.data.link_sessions
+            ?.at(0)
+            ?.results?.item_add_results.at(0);
+
+          // We will assume its not done yet.
+          if (!item_add_result) return;
+
+          const { data } = await plaidClient.itemPublicTokenExchange({
+            public_token: item_add_result.public_token,
+          });
+
+          await db.insert(plaidAccessTokens).values({
+            id: randomUUID(),
+            userId: authData.user.id,
+            token: data.access_token,
+            logoUrl: "",
+            name: item_add_result.institution?.name || "Unknown",
+          });
+
+          await db
+            .update(plaidLink)
+            .set({
+              completeAt: new Date(),
+            })
+            .where(eq(plaidLink.token, link_token));
+        } catch (e) {
+          console.error(e);
+          throw Error("Plaid error");
+        }
       },
 
       async updateTransactions() {
@@ -108,29 +146,39 @@ const createMutators = (authData: AuthData | null) => {
             end_date: new Date().toISOString().split("T")[0],
           });
 
-          const transactions = data.transactions.map(tx => ({
-            id: randomUUID(),
-            user_id: authData.user.id,
-            plaid_id: tx.transaction_id,
-            account_id: tx.account_id,
-            name: tx.name,
-            amount: tx.amount as any,
-            datetime: tx.datetime ? new Date(tx.datetime) : new Date(tx.date),
-            authorized_datetime: tx.authorized_datetime ? new Date(tx.authorized_datetime) : undefined,
-            json: JSON.stringify(tx),
-          } satisfies InferInsertModel<typeof transaction>));
+          const transactions = data.transactions.map(
+            (tx) =>
+              ({
+                id: randomUUID(),
+                user_id: authData.user.id,
+                plaid_id: tx.transaction_id,
+                account_id: tx.account_id,
+                name: tx.name,
+                amount: tx.amount as any,
+                datetime: tx.datetime
+                  ? new Date(tx.datetime)
+                  : new Date(tx.date),
+                authorized_datetime: tx.authorized_datetime
+                  ? new Date(tx.authorized_datetime)
+                  : undefined,
+                json: JSON.stringify(tx),
+              }) satisfies InferInsertModel<typeof transaction>,
+          );
 
-          await db.insert(transaction).values(transactions).onConflictDoNothing({
-            target: transaction.plaid_id,
-          });
+          await db
+            .insert(transaction)
+            .values(transactions)
+            .onConflictDoNothing({
+              target: transaction.plaid_id,
+            });
 
           const txReplacingPendingIds = data.transactions
-            .filter(t => t.pending_transaction_id)
-            .map(t => t.pending_transaction_id!);
+            .filter((t) => t.pending_transaction_id)
+            .map((t) => t.pending_transaction_id!);
 
-          await db.delete(transaction)
+          await db
+            .delete(transaction)
             .where(inArray(transaction.plaid_id, txReplacingPendingIds));
-
         }
       },
 
@@ -146,26 +194,33 @@ const createMutators = (authData: AuthData | null) => {
 
         for (const account of accounts) {
           const { data } = await plaidClient.accountsBalanceGet({
-            access_token: account.token
+            access_token: account.token,
           });
-          await db.insert(balance).values(data.accounts.map(bal => ({
-            id: randomUUID(),
-            user_id: authData.user.id,
-            plaid_id: bal.account_id,
-            avaliable: bal.balances.available as any,
-            current: bal.balances.current as any,
-            name: bal.name,
-            tokenId: account.id,
-          }))).onConflictDoUpdate({
-            target: balance.plaid_id,
-            set: { current: sql.raw(`excluded.${balance.current.name}`), avaliable: sql.raw(`excluded.${balance.avaliable.name}`) }
-          })
+          await db
+            .insert(balance)
+            .values(
+              data.accounts.map((bal) => ({
+                id: randomUUID(),
+                user_id: authData.user.id,
+                plaid_id: bal.account_id,
+                avaliable: bal.balances.available as any,
+                current: bal.balances.current as any,
+                name: bal.name,
+                tokenId: account.id,
+              })),
+            )
+            .onConflictDoUpdate({
+              target: balance.plaid_id,
+              set: {
+                current: sql.raw(`excluded.${balance.current.name}`),
+                avaliable: sql.raw(`excluded.${balance.avaliable.name}`),
+              },
+            });
         }
-
       },
-    }
+    },
   } as const satisfies Mutators;
-}
+};
 
 const zero = getHono()
   .post("/mutate", async (c) => {

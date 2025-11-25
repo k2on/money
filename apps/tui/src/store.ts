@@ -23,7 +23,7 @@ async function loadFile(name: string): Promise<Map<string, ReadonlyJSONValue>> {
     const buf = await fs.readFile(filePath, "utf8");
     const obj = JSON.parse(buf) as Record<string, ReadonlyJSONValue>;
     const frozen = Object.fromEntries(
-      Object.entries(obj).map(([k, v]) => [k, deepFreeze(v)])
+      Object.entries(obj).map(([k, v]) => [k, deepFreeze(v)]),
     );
     return new Map(Object.entries(frozen));
   } catch (err: any) {
@@ -73,7 +73,9 @@ export const kvStore: StoreProvider = {
         closed: txClosed,
         async has(key: string) {
           if (txClosed) throw new Error("transaction closed");
-          return staging.has(key) ? staging.get(key) !== undefined : data.has(key);
+          return staging.has(key)
+            ? staging.get(key) !== undefined
+            : data.has(key);
         },
         async get(key: string) {
           if (txClosed) throw new Error("transaction closed");

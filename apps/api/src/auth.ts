@@ -20,25 +20,25 @@ export const auth = betterAuth({
     "money://",
   ],
   advanced: {
-      crossSubDomainCookies: {
-          enabled: process.env.NODE_ENV == 'production',
-          domain: "koon.us",
-      },
+    crossSubDomainCookies: {
+      enabled: process.env.NODE_ENV == "production",
+      domain: "koon.us",
+    },
   },
   plugins: [
     expo(),
     genericOAuth({
       config: [
         {
-          providerId: 'koon-family',
+          providerId: "koon-family",
           clientId: process.env.OAUTH_CLIENT_ID!,
           clientSecret: process.env.OAUTH_CLIENT_SECRET!,
           discoveryUrl: process.env.OAUTH_DISCOVERY_URL!,
           scopes: ["profile", "email"],
-        }
-      ]
+        },
+      ],
     }),
     deviceAuthorization(),
     bearer(),
-  ]
+  ],
 });

@@ -5,37 +5,59 @@ import { type AuthData } from "./auth";
 import { isLoggedIn } from "./zql";
 
 export const queries = {
-  me: syncedQueryWithContext('me', z.tuple([]), (authData: AuthData | null) => {
+  me: syncedQueryWithContext("me", z.tuple([]), (authData: AuthData | null) => {
     isLoggedIn(authData);
-    return builder.users
-      .where('id', '=', authData.user.id)
-      .one();
+    return builder.users.where("id", "=", authData.user.id).one();
   }),
-  allTransactions: syncedQueryWithContext('allTransactions', z.tuple([]), (authData: AuthData | null) => {
-    isLoggedIn(authData);
-    return builder.transaction
-      .where('user_id', '=', authData.user.id)
-      .orderBy('datetime', 'desc')
-      .limit(50)
-  }),
-  getPlaidLink: syncedQueryWithContext('getPlaidLink', z.tuple([]), (authData: AuthData | null) => {
-    isLoggedIn(authData);
-    return builder.plaidLink
-      .where('user_id', '=', authData.user.id)
-      .where('createdAt', '>', new Date().getTime() - (1000 * 60 * 60 * 4))
-      .orderBy('createdAt', 'desc')
-      .one();
-  }),
-  getBalances: syncedQueryWithContext('getBalances', z.tuple([]), (authData: AuthData | null) => {
-    isLoggedIn(authData);
-    return builder.balance
-      .where('user_id', '=', authData.user.id)
-      .orderBy('name', 'asc');
-  }),
-  getItems: syncedQueryWithContext('getItems', z.tuple([]), (authData: AuthData | null) => {
-    isLoggedIn(authData);
-    return builder.plaidAccessTokens
-      .where('userId', '=', authData.user.id)
-      .orderBy('createdAt', 'desc');
-  })
+  allTransactions: syncedQueryWithContext(
+    "allTransactions",
+    z.tuple([]),
+    (authData: AuthData | null) => {
+      isLoggedIn(authData);
+      return builder.transaction
+        .where("user_id", "=", authData.user.id)
+        .orderBy("datetime", "desc")
+        .limit(50);
+    },
+  ),
+  getPlaidLink: syncedQueryWithContext(
+    "getPlaidLink",
+    z.tuple([]),
+    (authData: AuthData | null) => {
+      isLoggedIn(authData);
+      return builder.plaidLink
+        .where(({ cmp, and, or }) =>
+          and(
+            cmp("user_id", "=", authData.user.id),
+            cmp("createdAt", ">", new Date().getTime() - 1000 * 60 * 60 * 4),
+            or(
+              cmp("completeAt", ">", new Date().getTime() - 1000 * 5),
+              cmp("completeAt", "IS", null),
+            ),
+          ),
+        )
+        .orderBy("createdAt", "desc")
+        .one();
+    },
+  ),
+  getBalances: syncedQueryWithContext(
+    "getBalances",
+    z.tuple([]),
+    (authData: AuthData | null) => {
+      isLoggedIn(authData);
+      return builder.balance
+        .where("user_id", "=", authData.user.id)
+        .orderBy("name", "asc");
+    },
+  ),
+  getItems: syncedQueryWithContext(
+    "getItems",
+    z.tuple([]),
+    (authData: AuthData | null) => {
+      isLoggedIn(authData);
+      return builder.plaidAccessTokens
+        .where("userId", "=", authData.user.id)
+        .orderBy("createdAt", "desc");
+    },
+  ),
 };

@@ -5,14 +5,17 @@ import { Text, Pressable } from "react-native";
 export interface ButtonProps {
   children: ReactNode;
   onPress?: () => void;
-  variant?: 'default' | 'secondary' | 'destructive';
+  variant?: "default" | "secondary" | "destructive";
   shortcut?: string;
 }
 
-const STYLES: Record<NonNullable<ButtonProps['variant']>, { backgroundColor: string, color: string }> = {
-  default: { backgroundColor: 'black', color: 'white' },
-  secondary: { backgroundColor: '#ccc', color: 'black' },
-  destructive: { backgroundColor: 'red', color: 'white' },
+const STYLES: Record<
+  NonNullable<ButtonProps["variant"]>,
+  { backgroundColor: string; color: string }
+> = {
+  default: { backgroundColor: "black", color: "white" },
+  secondary: { backgroundColor: "#ccc", color: "black" },
+  destructive: { backgroundColor: "red", color: "white" },
 };
 
 export function Button({ children, variant, onPress, shortcut }: ButtonProps) {
@@ -23,7 +26,13 @@ export function Button({ children, variant, onPress, shortcut }: ButtonProps) {
     if (key.name == shortcut) onPress();
   });
 
-  return <Pressable onPress={onPress} style={{ backgroundColor }}>
-    <Text style={{ fontFamily: 'mono', color }}>  {children}{shortcut && ` (${shortcut})`}  </Text>
-  </Pressable>
+  return (
+    <Pressable onPress={onPress} style={{ backgroundColor }}>
+      <Text style={{ fontFamily: "mono", color }}>
+        {" "}
+        {children}
+        {shortcut && ` (${shortcut})`}{" "}
+      </Text>
+    </Pressable>
+  );
 }

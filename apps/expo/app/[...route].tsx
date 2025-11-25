@@ -5,7 +5,9 @@ import { authClient } from "@/lib/auth-client";
 
 export default function Page() {
   const { route: initalRoute } = useLocalSearchParams<{ route: string[] }>();
-  const [route, setRoute] = useState(initalRoute ? "/" + initalRoute.join("/") : "/");
+  const [route, setRoute] = useState(
+    initalRoute ? "/" + initalRoute.join("/") : "/",
+  );
 
   const { data } = authClient.useSession();
 

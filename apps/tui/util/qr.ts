@@ -22,5 +22,3 @@ export function QR(value: string): string {
   }
   return out;
 }
-
-

@@ -33,4 +33,3 @@ try {
   console.error("Failed to update .env.dev:", err);
   process.exit(1);
 }
-

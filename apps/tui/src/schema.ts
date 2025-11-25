@@ -1,6 +1,9 @@
 import { Schema } from "effect";
 
-const DateFromDateOrString = Schema.Union(Schema.DateFromString, Schema.DateFromSelf);
+const DateFromDateOrString = Schema.Union(
+  Schema.DateFromString,
+  Schema.DateFromSelf,
+);
 
 const SessionSchema = Schema.Struct({
   expiresAt: DateFromDateOrString,
@@ -23,11 +26,9 @@ const UserSchema = Schema.Struct({
   id: Schema.String,
 });
 
-
 export const AuthState = Schema.Struct({
   session: SessionSchema,
   user: UserSchema,
 });
 
 export type AuthData = typeof AuthState.Type;
-

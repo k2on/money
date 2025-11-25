@@ -10,5 +10,5 @@ export const config = {
   authClientId: "koon-family",
   authClientUserAgent: "CLI",
   zeroUrl: "http://laptop:4848",
-  apiUrl: "http://laptop:3000"
+  apiUrl: "http://laptop:3000",
 };

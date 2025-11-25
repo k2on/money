@@ -4,9 +4,5 @@ import { deviceAuthorizationClient } from "better-auth/client/plugins";
 
 export const authClient = createAuthClient({
   baseURL: config.apiUrl,
-  plugins: [
-    deviceAuthorizationClient(),
-  ]
+  plugins: [deviceAuthorizationClient()],
 });
-
-

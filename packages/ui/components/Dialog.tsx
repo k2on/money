@@ -1,6 +1,13 @@
-import { type ReactNode } from "react";
+import { createContext, type ReactNode } from "react";
 import { Modal, View, Text } from "react-native";
 import { useKeyboard } from "../src/useKeyboard";
+
+export interface DialogState {
+  close?: () => void;
+}
+export const Context = createContext<DialogState>({
+  close: () => {},
+});
 
 interface ProviderProps {
   children: ReactNode;
@@ -9,18 +16,27 @@ interface ProviderProps {
 }
 export function Provider({ children, visible, close }: ProviderProps) {
   useKeyboard((key) => {
-    if (key.name == 'escape') {
+    if (key.name == "escape") {
       if (close) close();
     }
   }, []);
 
   return (
-    <Modal transparent visible={visible} >
-      {/* <Pressable onPress={() => close && close()} style={{ justifyContent: 'center', alignItems: 'center', flex: 1, backgroundColor: 'rgba(0,0,0,0.2)',  }}> */}
-      <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1, backgroundColor: 'rgba(0,0,0,0.2)',  }}>
-        {visible && children}
-      </View>
-    </Modal>
+    <Context.Provider value={{ close }}>
+      <Modal transparent visible={visible}>
+        {/* <Pressable onPress={() => close && close()} style={{ justifyContent: 'center', alignItems: 'center', flex: 1, backgroundColor: 'rgba(0,0,0,0.2)',  }}> */}
+        <View
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.2)",
+          }}
+        >
+          {visible && children}
+        </View>
+      </Modal>
+    </Context.Provider>
   );
 }
 
@@ -29,7 +45,9 @@ interface ContentProps {
 }
 export function Content({ children }: ContentProps) {
   return (
-    <View style={{ backgroundColor: 'white', padding: 12, alignItems: 'center'  }}>
+    <View
+      style={{ backgroundColor: "white", padding: 12, alignItems: "center" }}
+    >
       {children}
     </View>
   );

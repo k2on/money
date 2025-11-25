@@ -214,6 +214,16 @@ export const schema = {
             "token"
           >,
         },
+        completeAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "plaidLink",
+            "completeAt"
+          >,
+          serverName: "complete_at",
+        },
         createdAt: {
           type: "number",
           optional: true,

@@ -5,9 +5,12 @@ import path from "path";
 const aliasPlugin = {
   name: "alias-react-native",
   setup(build) {
-    build.onResolve({ filter: /^react-native$/ }, args => {
+    build.onResolve({ filter: /^react-native$/ }, (args) => {
       return {
-        path: path.resolve(__dirname, "../../packages/react-native-opentui/index.tsx"),
+        path: path.resolve(
+          __dirname,
+          "../../packages/react-native-opentui/index.tsx",
+        ),
       };
     });
   },
@@ -16,9 +19,9 @@ const aliasPlugin = {
 // Build configuration
 await esbuild.build({
   entryPoints: ["src/index.tsx"], // your app entry
-  bundle: true,                            // inline all dependencies (ui included)
-  platform: "node",                        // Node/Bun target
-  format: "esm",                           // keep ESM for top-level await
+  bundle: true, // inline all dependencies (ui included)
+  platform: "node", // Node/Bun target
+  format: "esm", // keep ESM for top-level await
   outfile: "dist/index.js",
   sourcemap: true,
   plugins: [aliasPlugin],

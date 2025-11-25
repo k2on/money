@@ -1,17 +1,23 @@
-import { Stack } from 'expo-router';
-import 'react-native-reanimated';
+import { Stack } from "expo-router";
+import "react-native-reanimated";
 
-import { authClient } from '@/lib/auth-client';
-import { ZeroProvider } from '@rocicorp/zero/react';
-import { useMemo } from 'react';
-import { authDataSchema } from '@money/shared/auth';
-import { Platform } from 'react-native';
-import type { ZeroOptions } from '@rocicorp/zero';
-import { schema, type Schema, createMutators, type Mutators, BASE_URL } from '@money/shared';
+import { authClient } from "@/lib/auth-client";
+import { ZeroProvider } from "@rocicorp/zero/react";
+import { useMemo } from "react";
+import { authDataSchema } from "@money/shared/auth";
+import { Platform } from "react-native";
+import type { ZeroOptions } from "@rocicorp/zero";
+import {
+  schema,
+  type Schema,
+  createMutators,
+  type Mutators,
+  BASE_URL,
+} from "@money/shared";
 import { expoSQLiteStoreProvider } from "@rocicorp/zero/react-native";
 
 export const unstable_settings = {
-  anchor: 'index',
+  anchor: "index",
 };
 
 const kvStore = Platform.OS === "web" ? undefined : expoSQLiteStoreProvider();
@@ -25,19 +31,22 @@ export default function RootLayout() {
   }, [session]);
 
   const cookie = useMemo(() => {
-    return Platform.OS == 'web' ? undefined : authClient.getCookie();
+    return Platform.OS == "web" ? undefined : authClient.getCookie();
   }, [session, isPending]);
 
   const zeroProps = useMemo(() => {
     return {
-      storageKey: 'money',
+      storageKey: "money",
       kvStore,
-      server: process.env.NODE_ENV == 'production' ? 'https://zero.koon.us' : `${BASE_URL}:4848`,
+      server:
+        process.env.NODE_ENV == "production"
+          ? "https://zero.koon.us"
+          : `${BASE_URL}:4848`,
       userID: authData?.user.id ?? "anon",
       schema,
       mutators: createMutators(authData),
       auth: cookie,
-    } as const satisfies ZeroOptions<Schema, Mutators>; 
+    } as const satisfies ZeroOptions<Schema, Mutators>;
   }, [authData, cookie]);
 
   return (
