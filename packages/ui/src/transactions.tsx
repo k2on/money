@@ -1,6 +1,11 @@
 import * as Table from "../components/Table";
-import { useQuery } from "@rocicorp/zero/react";
-import { queries, type Transaction } from "@money/shared";
+import { useQuery, useZero } from "@rocicorp/zero/react";
+import {
+  queries,
+  type Mutators,
+  type Schema,
+  type Transaction,
+} from "@money/shared";
 import { use } from "react";
 import { View, Text } from "react-native";
 import { RouterContext } from ".";
@@ -29,8 +34,18 @@ export function Transactions() {
   const { auth } = use(RouterContext);
   const [items] = useQuery(queries.allTransactions(auth));
 
+  const z = useZero<Schema, Mutators>();
+
   return (
-    <Table.Provider data={items} columns={COLUMNS}>
+    <Table.Provider
+      data={items}
+      columns={COLUMNS}
+      onKey={(key) => {
+        if (key.name == "r" && key.shift) {
+          z.mutate.link.updateTransactions();
+        }
+      }}
+    >
       <View style={{ flex: 1 }}>
         <View style={{ flexShrink: 0 }}>
           <Table.Body />
