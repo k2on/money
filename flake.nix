@@ -20,6 +20,7 @@
           corepack
           nodejs_22
           bun
+          biome
 
           postgresql
           process-compose
