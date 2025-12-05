@@ -1,18 +1,24 @@
-import { createContext, use } from "react";
+import { createContext, use, useEffect, useRef } from "react";
 import { Transactions } from "./transactions";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { Settings } from "./settings";
-import { useKeyboard } from "./useKeyboard";
 import type { AuthData } from "@money/shared/auth";
+import { Budget } from "./budget";
+import { ShortcutProvider, ShortcutDebug, keysStore } from "../lib/shortcuts";
+import { useShortcut } from "../lib/shortcuts/hooks";
 
 const PAGES = {
   "/": {
     screen: <Transactions />,
     key: "1",
   },
+  "/budget": {
+    screen: <Budget />,
+    key: "2",
+  },
   "/settings": {
     screen: <Settings />,
-    key: "2",
+    key: "3",
     children: {
       "/accounts": {},
       "/family": {},
@@ -59,7 +65,10 @@ type AppProps = {
 export function App({ auth, route, setRoute }: AppProps) {
   return (
     <RouterContext.Provider value={{ auth, route, setRoute }}>
-      <Main />
+      <ShortcutProvider>
+        <ShortcutDebug />
+        <Main />
+      </ShortcutProvider>
     </RouterContext.Provider>
   );
 }
@@ -67,17 +76,9 @@ export function App({ auth, route, setRoute }: AppProps) {
 function Main() {
   const { route, setRoute } = use(RouterContext);
 
-  useKeyboard((key) => {
-    const screen = Object.entries(PAGES).find(
-      ([, screen]) => screen.key == key.name,
-    );
-
-    if (!screen) return;
-
-    const [route] = screen as [Route, never];
-
-    setRoute(route);
-  });
+  for (const [route, page] of Object.entries(PAGES)) {
+    useShortcut(page.key, () => setRoute(route as Route));
+  }
 
   const match =
     route in PAGES

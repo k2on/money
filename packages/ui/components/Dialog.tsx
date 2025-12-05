@@ -1,6 +1,5 @@
 import { createContext, type ReactNode } from "react";
 import { Modal, View, Text } from "react-native";
-import { useKeyboard } from "../src/useKeyboard";
 
 export interface DialogState {
   close?: () => void;
@@ -15,12 +14,6 @@ interface ProviderProps {
   close?: () => void;
 }
 export function Provider({ children, visible, close }: ProviderProps) {
-  useKeyboard((key) => {
-    if (key.name == "escape") {
-      if (close) close();
-    }
-  }, []);
-
   return (
     <Context.Provider value={{ close }}>
       <Modal transparent visible={visible}>

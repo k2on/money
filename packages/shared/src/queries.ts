@@ -60,4 +60,20 @@ export const queries = {
         .orderBy("createdAt", "desc");
     },
   ),
+  getBudgets: syncedQueryWithContext(
+    "getBudgets",
+    z.tuple([]),
+    (authData: AuthData | null) => {
+      isLoggedIn(authData);
+      return builder.budget.limit(10);
+    },
+  ),
+  getBudgetCategories: syncedQueryWithContext(
+    "getBudgetCategories",
+    z.tuple([]),
+    (authData: AuthData | null) => {
+      isLoggedIn(authData);
+      return builder.category.orderBy("order", "desc");
+    },
+  ),
 };

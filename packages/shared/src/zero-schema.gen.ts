@@ -112,6 +112,170 @@ export const schema = {
       },
       primaryKey: ["id"],
     },
+    budget: {
+      name: "budget",
+      columns: {
+        id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "budget",
+            "id"
+          >,
+        },
+        orgId: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "budget",
+            "orgId"
+          >,
+          serverName: "org_id",
+        },
+        label: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "budget",
+            "label"
+          >,
+        },
+        createdBy: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "budget",
+            "createdBy"
+          >,
+          serverName: "created_by",
+        },
+        createdAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "budget",
+            "createdAt"
+          >,
+          serverName: "created_at",
+        },
+        updatedAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "budget",
+            "updatedAt"
+          >,
+          serverName: "updated_at",
+        },
+      },
+      primaryKey: ["id"],
+    },
+    category: {
+      name: "category",
+      columns: {
+        id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "category",
+            "id"
+          >,
+        },
+        budgetId: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "category",
+            "budgetId"
+          >,
+          serverName: "budget_id",
+        },
+        amount: {
+          type: "number",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "category",
+            "amount"
+          >,
+        },
+        every: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "category",
+            "every"
+          >,
+        },
+        order: {
+          type: "number",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "category",
+            "order"
+          >,
+        },
+        label: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "category",
+            "label"
+          >,
+        },
+        color: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "category",
+            "color"
+          >,
+        },
+        createdBy: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "category",
+            "createdBy"
+          >,
+          serverName: "created_by",
+        },
+        createdAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "category",
+            "createdAt"
+          >,
+          serverName: "created_at",
+        },
+        updatedAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "category",
+            "updatedAt"
+          >,
+          serverName: "updated_at",
+        },
+      },
+      primaryKey: ["id"],
+    },
     plaidAccessTokens: {
       name: "plaidAccessTokens",
       columns: {
@@ -433,6 +597,16 @@ export type Schema = typeof schema;
  * This type is auto-generated from your Drizzle schema definition.
  */
 export type Balance = Row<Schema["tables"]["balance"]>;
+/**
+ * Represents a row from the "budget" table.
+ * This type is auto-generated from your Drizzle schema definition.
+ */
+export type Budget = Row<Schema["tables"]["budget"]>;
+/**
+ * Represents a row from the "category" table.
+ * This type is auto-generated from your Drizzle schema definition.
+ */
+export type Category = Row<Schema["tables"]["category"]>;
 /**
  * Represents a row from the "plaidAccessTokens" table.
  * This type is auto-generated from your Drizzle schema definition.

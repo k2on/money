@@ -1,7 +1,14 @@
-import { createContext, use, useState, type ReactNode } from "react";
+import {
+  createContext,
+  use,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { View, Text } from "react-native";
-import { useKeyboard } from "../src/useKeyboard";
 import type { KeyEvent } from "@opentui/core";
+import { useShortcut } from "../lib/shortcuts/hooks";
 
 const HEADER_COLOR = "#7158e2";
 const TABLE_COLORS = ["#ddd", "#eee"];
@@ -58,33 +65,12 @@ export function Provider<T extends ValidRecord>({
   const [idx, setIdx] = useState(0);
   const [selectedFrom, setSelectedFrom] = useState<number>();
 
-  useKeyboard(
-    (key) => {
-      if (key.name == "j" || key.name == "down") {
-        if (key.shift && selectedFrom == undefined) {
-          setSelectedFrom(idx);
-        }
-        setIdx((prev) => Math.min(prev + 1, data.length - 1));
-      } else if (key.name == "k" || key.name == "up") {
-        if (key.shift && selectedFrom == undefined) {
-          setSelectedFrom(idx);
-        }
-        setIdx((prev) => Math.max(prev - 1, 0));
-      } else if (key.name == "g" && key.shift) {
-        setIdx(data.length - 1);
-      } else if (key.name == "v") {
-        setSelectedFrom(idx);
-      } else if (key.name == "escape") {
-        setSelectedFrom(undefined);
-      } else {
-        const from = selectedFrom ? Math.min(idx, selectedFrom) : idx;
-        const to = selectedFrom ? Math.max(idx, selectedFrom) : idx;
-        const selected = data.slice(from, to + 1);
-        if (onKey) onKey(key, selected);
-      }
-    },
-    [data, idx, selectedFrom],
-  );
+  useShortcut("j", () => {
+    setIdx((prev) => Math.min(prev + 1, data.length - 1));
+  });
+  useShortcut("k", () => {
+    setIdx((prev) => Math.max(prev - 1, 0));
+  });
 
   const columnMap = new Map(
     columns.map((col) => {

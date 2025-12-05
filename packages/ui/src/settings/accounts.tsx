@@ -3,7 +3,6 @@ import { queries, type Mutators, type Schema } from "@money/shared";
 import { use, useEffect, useState } from "react";
 import { RouterContext } from "..";
 import { View, Text, Linking } from "react-native";
-import { useKeyboard } from "../useKeyboard";
 import { Button } from "../../components/Button";
 import * as Table from "../../components/Table";
 import * as Dialog from "../../components/Dialog";

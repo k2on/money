@@ -1,5 +1,5 @@
 import type { Transaction } from "@rocicorp/zero";
-import type { AuthData } from "./auth";
+import { authDataSchema, type AuthData } from "./auth";
 import { type Schema } from "./zero-schema.gen";
 import { isLoggedIn } from "./zql";
 
@@ -37,6 +37,17 @@ export function createMutators(authData: AuthData | null) {
             }
           }
         }
+      },
+    },
+    budget: {
+      async create(tx: Tx, { id }: { id: string }) {
+        isLoggedIn(authData);
+        await tx.mutate.budget.insert({
+          id,
+          orgId: authData.user.id,
+          label: "New Budget",
+          createdBy: authData.user.id,
+        });
       },
     },
   } as const;

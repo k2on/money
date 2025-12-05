@@ -6,6 +6,7 @@ import {
   timestamp,
   pgEnum,
   uniqueIndex,
+  numeric,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable(
@@ -64,4 +65,26 @@ export const plaidAccessTokens = pgTable("plaidAccessToken", {
   userId: text("user_id").notNull(),
   token: text("token").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const budget = pgTable("budget", {
+  id: text("id").primaryKey(),
+  orgId: text("org_id").notNull(),
+  label: text("label").notNull(),
+  createdBy: text("created_by").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const category = pgTable("category", {
+  id: text("id").primaryKey(),
+  budgetId: text("budget_id").notNull(),
+  amount: decimal("amount").notNull(),
+  every: text("every", { enum: ["year", "month", "week"] }).notNull(),
+  order: numeric("order").notNull(),
+  label: text("label").notNull(),
+  color: text("color").notNull(),
+  createdBy: text("created_by").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

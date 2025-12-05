@@ -74,6 +74,11 @@ export function View({ children, style }: ViewProps) {
     justifyContent: attr(style, "justifyContent", "string"),
     flexShrink: attr(style, "flexShrink", "number"),
     flexDirection: attr(style, "flexDirection", "string"),
+    top: attr(style, "top", "number"),
+    zIndex: attr(style, "zIndex", "number"),
+    left: attr(style, "left", "number"),
+    right: attr(style, "right", "number"),
+    bottom: attr(style, "bottom", "number"),
     flexGrow:
       attr(style, "flex", "number") || attr(style, "flexGrow", "number"),
   };
