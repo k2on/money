@@ -1,11 +1,12 @@
-import { createContext, type ReactNode } from "react";
+import { createContext, use, type ReactNode } from "react";
 import { Modal, View, Text } from "react-native";
+import { useShortcut } from "../lib/shortcuts";
 
 export interface DialogState {
   close?: () => void;
 }
 export const Context = createContext<DialogState>({
-  close: () => {},
+  close: () => { },
 });
 
 interface ProviderProps {
@@ -37,6 +38,9 @@ interface ContentProps {
   children: ReactNode;
 }
 export function Content({ children }: ContentProps) {
+  const { close } = use(Context);
+  useShortcut("escape", () => close?.());
+
   return (
     <View
       style={{ backgroundColor: "white", padding: 12, alignItems: "center" }}

@@ -8,6 +8,7 @@ import type {
   StyleProp,
   ViewStyle,
   LinkingImpl,
+  TextInputProps,
 } from "react-native";
 import { useTerminalDimensions } from "@opentui/react";
 import { RGBA } from "@opentui/core";
@@ -56,10 +57,10 @@ export function View({ children, style }: ViewProps) {
       ? typeof style.backgroundColor == "string"
         ? style.backgroundColor.startsWith("rgba(")
           ? (() => {
-              const parts = style.backgroundColor.split("(")[1].split(")")[0];
-              const [r, g, b, a] = parts.split(",").map(parseFloat);
-              return RGBA.fromInts(r, g, b, a * 255);
-            })()
+            const parts = style.backgroundColor.split("(")[1].split(")")[0];
+            const [r, g, b, a] = parts.split(",").map(parseFloat);
+            return RGBA.fromInts(r, g, b, a * 255);
+          })()
           : style.backgroundColor
         : undefined
       : undefined;
@@ -107,10 +108,10 @@ export function Pressable({
       ? typeof style.backgroundColor == "string"
         ? style.backgroundColor.startsWith("rgba(")
           ? (() => {
-              const parts = style.backgroundColor.split("(")[1].split(")")[0];
-              const [r, g, b, a] = parts.split(",").map(parseFloat);
-              return RGBA.fromInts(r, g, b, a * 255);
-            })()
+            const parts = style.backgroundColor.split("(")[1].split(")")[0];
+            const [r, g, b, a] = parts.split(",").map(parseFloat);
+            return RGBA.fromInts(r, g, b, a * 255);
+          })()
           : style.backgroundColor
         : undefined
       : undefined;
@@ -174,9 +175,9 @@ export function Pressable({
       onMouseDown={
         onPress
           ? (_event) => {
-              // @ts-ignore
-              onPress();
-            }
+            // @ts-ignore
+            onPress();
+          }
           : undefined
       }
       backgroundColor={bg}
@@ -223,6 +224,32 @@ export function Modal({ children, visible }: ModalProps) {
     >
       {children}
     </box>
+  );
+}
+
+export function TextInput({
+  defaultValue,
+  onChangeText,
+  onKeyPress,
+}: TextInputProps) {
+  return (
+    <input
+      width={20}
+      backgroundColor="white"
+      textColor="black"
+      focused={true}
+      cursorColor={"black"}
+      onInput={onChangeText}
+      onKeyDown={(key) =>
+        // @ts-ignore
+        onKeyPress({
+          nativeEvent: {
+            key: key.name == "return" ? "Enter" : key.name,
+          },
+        })
+      }
+      placeholder={defaultValue}
+    />
   );
 }
 

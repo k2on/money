@@ -8,10 +8,10 @@ type Tx = Transaction<Schema>;
 export function createMutators(authData: AuthData | null) {
   return {
     link: {
-      async create() {},
-      async get(tx: Tx, { link_token }: { link_token: string }) {},
-      async updateTransactions() {},
-      async updateBalences() {},
+      async create() { },
+      async get(tx: Tx, { link_token }: { link_token: string }) { },
+      async updateTransactions() { },
+      async updateBalences() { },
       async deleteAccounts(tx: Tx, { accountIds }: { accountIds: string[] }) {
         isLoggedIn(authData);
         for (const id of accountIds) {
@@ -40,13 +40,70 @@ export function createMutators(authData: AuthData | null) {
       },
     },
     budget: {
-      async create(tx: Tx, { id }: { id: string }) {
+      async create(
+        tx: Tx,
+        { id, categoryId }: { id: string; categoryId: string },
+      ) {
         isLoggedIn(authData);
         await tx.mutate.budget.insert({
           id,
           orgId: authData.user.id,
           label: "New Budget",
           createdBy: authData.user.id,
+        });
+        await tx.mutate.category.insert({
+          id: categoryId,
+          budgetId: id,
+          amount: 0,
+          every: "week",
+          order: 1000,
+          label: "My category",
+          color: "#f06",
+          createdBy: authData.user.id,
+        });
+      },
+      async delete(tx: Tx, { id }: { id: string }) {
+        isLoggedIn(authData);
+        await tx.mutate.budget.delete({
+          id,
+        });
+      },
+      async createCategory(
+        tx: Tx,
+        {
+          id,
+          budgetId,
+          order,
+        }: { id: string; budgetId: string; order?: number },
+      ) {
+        isLoggedIn(authData);
+        tx.mutate.category.insert({
+          id,
+          budgetId,
+          amount: 0,
+          every: "week",
+          order: order || 0,
+          label: "My category",
+          color: "#f06",
+          createdBy: authData.user.id,
+        });
+      },
+      async deleteCategory(tx: Tx, { id }: { id: string }) {
+        isLoggedIn(authData);
+        tx.mutate.category.update({
+          id,
+          removedAt: new Date().getTime(),
+          removedBy: authData.user.id,
+        });
+      },
+      async updateCategory(
+        tx: Tx,
+        { id, label }: { id: string; label: string },
+      ) {
+        isLoggedIn(authData);
+        tx.mutate.category.update({
+          id,
+          label,
         });
       },
     },

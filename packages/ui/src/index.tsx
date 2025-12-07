@@ -1,11 +1,15 @@
-import { createContext, use, useEffect, useRef } from "react";
+import { createContext, use, type ReactNode } from "react";
 import { Transactions } from "./transactions";
 import { View } from "react-native";
 import { Settings } from "./settings";
 import type { AuthData } from "@money/shared/auth";
 import { Budget } from "./budget";
-import { ShortcutProvider, ShortcutDebug, keysStore } from "../lib/shortcuts";
-import { useShortcut } from "../lib/shortcuts/hooks";
+import {
+  ShortcutProvider,
+  ShortcutDebug,
+  useShortcut,
+  type KeyName,
+} from "../lib/shortcuts";
 
 const PAGES = {
   "/": {
@@ -24,7 +28,10 @@ const PAGES = {
       "/family": {},
     },
   },
-};
+} satisfies Record<
+  string,
+  { screen: ReactNode; key: KeyName; children?: Record<string, unknown> }
+>;
 
 type Join<A extends string, B extends string> = `${A}${B}` extends `${infer X}`
   ? X
@@ -32,14 +39,14 @@ type Join<A extends string, B extends string> = `${A}${B}` extends `${infer X}`
 
 type ChildRoutes<Parent extends string, Children> = {
   [K in keyof Children & string]: K extends `/${string}`
-    ? Join<Parent, K>
-    : never;
+  ? Join<Parent, K>
+  : never;
 }[keyof Children & string];
 
 type Routes<T> = {
   [K in keyof T & string]:
-    | K
-    | (T[K] extends { children: infer C } ? ChildRoutes<K, C> : never);
+  | K
+  | (T[K] extends { children: infer C } ? ChildRoutes<K, C> : never);
 }[keyof T & string];
 
 export type Route = Routes<typeof PAGES>;
@@ -53,7 +60,7 @@ interface RouterContextType {
 export const RouterContext = createContext<RouterContextType>({
   auth: null,
   route: "/",
-  setRoute: () => {},
+  setRoute: () => { },
 });
 
 type AppProps = {
@@ -84,8 +91,8 @@ function Main() {
     route in PAGES
       ? (route as keyof typeof PAGES)
       : (Object.keys(PAGES)
-          .sort((a, b) => b.length - a.length)
-          .find((p) => route.startsWith(p)) as keyof typeof PAGES);
+        .sort((a, b) => b.length - a.length)
+        .find((p) => route.startsWith(p)) as keyof typeof PAGES);
 
   return (
     <View style={{ backgroundColor: "white", flex: 1 }}>

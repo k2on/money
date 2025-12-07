@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
   boolean,
   decimal,
@@ -87,4 +88,17 @@ export const category = pgTable("category", {
   createdBy: text("created_by").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  removedBy: text("removed_by"),
+  removedAt: timestamp("removed_at"),
 });
+
+export const budgetRelations = relations(budget, ({ many }) => ({
+  categories: many(category),
+}));
+
+export const categoryRelations = relations(category, ({ one }) => ({
+  budget: one(budget, {
+    fields: [category.budgetId],
+    references: [budget.id],
+  }),
+}));

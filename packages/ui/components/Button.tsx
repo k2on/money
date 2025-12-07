@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from "react";
 import { Text, Pressable } from "react-native";
+import { useShortcut, type Key } from "../lib/shortcuts";
 
 type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
 
@@ -7,7 +8,7 @@ export interface ButtonProps {
   children: ReactNode;
   onPress?: () => void;
   variant?: "default" | "secondary" | "destructive";
-  shortcut?: string;
+  shortcut?: Key;
 }
 
 const STYLES: Record<
@@ -22,16 +23,9 @@ const STYLES: Record<
 export function Button({ children, variant, onPress, shortcut }: ButtonProps) {
   const { backgroundColor, color } = STYLES[variant || "default"];
 
-  // if (shortcut) {
-  // useKeys((key) => {
-  //   if (
-  //     typeof shortcut == "object"
-  //       ? key.name == shortcut.name
-  //       : key.name == shortcut
-  //   )
-  //     return onPress;
-  // });
-  // }
+  if (shortcut && onPress) {
+    useShortcut(shortcut, onPress);
+  }
 
   return (
     <Pressable onPress={onPress} style={{ backgroundColor }}>

@@ -4,6 +4,7 @@ import { RouterContext, type Route } from ".";
 import { General } from "./settings/general";
 import { Accounts } from "./settings/accounts";
 import { Family } from "./settings/family";
+import { useShortcut } from "../lib/shortcuts";
 
 type SettingsRoute = Extract<Route, `/settings${string}`>;
 
@@ -30,27 +31,24 @@ type Tab = keyof typeof TABS;
 export function Settings() {
   const { route, setRoute } = use(RouterContext);
 
-  // useKeyboard(
-  //   (key) => {
-  //     if (key.name == "h") {
-  //       const currentIdx = Object.entries(TABS).findIndex(
-  //         ([tabRoute, _]) => tabRoute == route,
-  //       );
-  //       const routes = Object.keys(TABS) as SettingsRoute[];
-  //       const last = routes[currentIdx - 1];
-  //       if (!last) return;
-  //       setRoute(last);
-  //     } else if (key.name == "l") {
-  //       const currentIdx = Object.entries(TABS).findIndex(
-  //         ([tabRoute, _]) => tabRoute == route,
-  //       );
-  //       const routes = Object.keys(TABS) as SettingsRoute[];
-  //       const next = routes[currentIdx + 1];
-  //       if (!next) return;
-  //       setRoute(next);
-  //     }
-  //   },
-  // );
+  useShortcut("h", () => {
+    const currentIdx = Object.entries(TABS).findIndex(
+      ([tabRoute, _]) => tabRoute == route,
+    );
+    const routes = Object.keys(TABS) as SettingsRoute[];
+    const last = routes[currentIdx - 1];
+    if (!last) return;
+    setRoute(last);
+  });
+  useShortcut("l", () => {
+    const currentIdx = Object.entries(TABS).findIndex(
+      ([tabRoute, _]) => tabRoute == route,
+    );
+    const routes = Object.keys(TABS) as SettingsRoute[];
+    const next = routes[currentIdx + 1];
+    if (!next) return;
+    setRoute(next);
+  });
 
   return (
     <View style={{ flexDirection: "row" }}>

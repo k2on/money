@@ -13,7 +13,7 @@ export default function Page() {
 
   useEffect(() => {
     const handler = () => {
-      const newRoute = window.location.pathname.slice(1);
+      const newRoute = window.location.pathname.slice(1) + "/";
       setRoute(newRoute);
     };
 

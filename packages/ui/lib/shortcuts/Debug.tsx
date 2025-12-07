@@ -16,9 +16,11 @@ export function ShortcutDebug() {
         bottom: 0,
         right: 0,
         backgroundColor: "black",
+        padding: 10,
       }}
     >
-      <Text style={{ color: "red", fontFamily: "mono" }}>
+      <Text style={{ color: "red", fontFamily: "mono" }}>Registered:</Text>
+      <Text style={{ color: "red", fontFamily: "mono", textAlign: "right" }}>
         {entries
           .values()
           .map(([key, _]) => key)

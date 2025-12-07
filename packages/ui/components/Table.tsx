@@ -9,6 +9,7 @@ import {
 import { View, Text } from "react-native";
 import type { KeyEvent } from "@opentui/core";
 import { useShortcut } from "../lib/shortcuts/hooks";
+import type { Key } from "../lib/shortcuts";
 
 const HEADER_COLOR = "#7158e2";
 const TABLE_COLORS = ["#ddd", "#eee"];
@@ -50,17 +51,22 @@ function renderCell(row: ValidRecord, column: Column): string {
   return cell.toString();
 }
 
+interface TableShortcut<T> {
+  key: Key;
+  handler: (params: { selected: T[]; index: number }) => void;
+}
+
 export interface ProviderProps<T> {
   data: T[];
   columns: Column[];
   children: ReactNode;
-  onKey?: (event: KeyEvent, selected: T[]) => void;
+  shortcuts?: TableShortcut<T>[];
 }
 export function Provider<T extends ValidRecord>({
   data,
   columns,
   children,
-  onKey,
+  shortcuts,
 }: ProviderProps<T>) {
   const [idx, setIdx] = useState(0);
   const [selectedFrom, setSelectedFrom] = useState<number>();
@@ -68,9 +74,30 @@ export function Provider<T extends ValidRecord>({
   useShortcut("j", () => {
     setIdx((prev) => Math.min(prev + 1, data.length - 1));
   });
+  useShortcut("down", () => {
+    setIdx((prev) => Math.min(prev + 1, data.length - 1));
+  });
   useShortcut("k", () => {
     setIdx((prev) => Math.max(prev - 1, 0));
   });
+  useShortcut("up", () => {
+    setIdx((prev) => Math.max(prev - 1, 0));
+  });
+
+  useEffect(() => {
+    setIdx((prev) => Math.max(Math.min(prev, data.length - 1), 0));
+  }, [data]);
+
+  if (shortcuts) {
+    for (const shortcut of shortcuts) {
+      useShortcut(shortcut.key, () => {
+        const from = selectedFrom ? Math.min(idx, selectedFrom) : idx;
+        const to = selectedFrom ? Math.max(idx, selectedFrom) : idx;
+        const selected = data.slice(from, to + 1);
+        shortcut.handler({ selected, index: idx });
+      });
+    }
+  }
 
   const columnMap = new Map(
     columns.map((col) => {

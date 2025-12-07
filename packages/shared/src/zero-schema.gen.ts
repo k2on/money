@@ -273,6 +273,26 @@ export const schema = {
           >,
           serverName: "updated_at",
         },
+        removedBy: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "category",
+            "removedBy"
+          >,
+          serverName: "removed_by",
+        },
+        removedAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "category",
+            "removedAt"
+          >,
+          serverName: "removed_at",
+        },
       },
       primaryKey: ["id"],
     },
@@ -582,7 +602,28 @@ export const schema = {
       serverName: "user",
     },
   },
-  relationships: {},
+  relationships: {
+    budget: {
+      categories: [
+        {
+          sourceField: ["id"],
+          destField: ["budgetId"],
+          destSchema: "category",
+          cardinality: "many",
+        },
+      ],
+    },
+    category: {
+      budget: [
+        {
+          sourceField: ["budgetId"],
+          destField: ["id"],
+          destSchema: "budget",
+          cardinality: "one",
+        },
+      ],
+    },
+  },
   enableLegacyQueries: false,
   enableLegacyMutators: false,
 } as const;

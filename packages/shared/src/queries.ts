@@ -65,7 +65,11 @@ export const queries = {
     z.tuple([]),
     (authData: AuthData | null) => {
       isLoggedIn(authData);
-      return builder.budget.limit(10);
+      return builder.budget
+        .related("categories", (q) =>
+          q.where("removedAt", "IS", null).orderBy("order", "desc"),
+        )
+        .limit(10);
     },
   ),
   getBudgetCategories: syncedQueryWithContext(
