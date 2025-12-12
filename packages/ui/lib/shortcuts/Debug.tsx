@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { View, Text } from "react-native";
-import { keysStore } from "./store";
+import { keysStore, type ScopeKeys } from "./store";
 
 export function ShortcutDebug() {
   const entries = useSyncExternalStore(
@@ -19,14 +19,23 @@ export function ShortcutDebug() {
         padding: 10,
       }}
     >
-      <Text style={{ color: "red", fontFamily: "mono" }}>Registered:</Text>
-      <Text style={{ color: "red", fontFamily: "mono", textAlign: "right" }}>
-        {entries
-          .values()
-          .map(([key, _]) => key)
-          .toArray()
-          .join(",")}
-      </Text>
+      <Text style={{ color: "red", fontFamily: "mono" }}>Scopes:</Text>
+      {entries.map(([scope, keys]) => (
+        <ScopeView key={scope} scope={scope} keys={keys} />
+      ))}
     </View>
+  );
+}
+
+function ScopeView({ scope, keys }: { scope: string; keys: ScopeKeys }) {
+  return (
+    <Text style={{ color: "red", fontFamily: "mono", textAlign: "right" }}>
+      {scope}:
+      {keys
+        .entries()
+        .map(([key, _]) => key)
+        .toArray()
+        .join(",")}
+    </Text>
   );
 }

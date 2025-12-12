@@ -6,7 +6,7 @@ export interface DialogState {
   close?: () => void;
 }
 export const Context = createContext<DialogState>({
-  close: () => { },
+  close: () => {},
 });
 
 interface ProviderProps {
@@ -21,7 +21,7 @@ export function Provider({ children, visible, close }: ProviderProps) {
         {/* <Pressable onPress={() => close && close()} style={{ justifyContent: 'center', alignItems: 'center', flex: 1, backgroundColor: 'rgba(0,0,0,0.2)',  }}> */}
         <View
           style={{
-            justifyContent: "center",
+            // justifyContent: "center",
             alignItems: "center",
             flex: 1,
             backgroundColor: "rgba(0,0,0,0.2)",
@@ -39,12 +39,10 @@ interface ContentProps {
 }
 export function Content({ children }: ContentProps) {
   const { close } = use(Context);
-  useShortcut("escape", () => close?.());
+  useShortcut("escape", () => close?.(), "dialog");
 
   return (
-    <View
-      style={{ backgroundColor: "white", padding: 12, alignItems: "center" }}
-    >
+    <View style={{ backgroundColor: "white", alignItems: "center", top: 120 }}>
       {children}
     </View>
   );

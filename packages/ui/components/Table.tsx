@@ -1,19 +1,15 @@
-import {
-  createContext,
-  use,
-  useEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, use, useEffect, useState, type ReactNode } from "react";
 import { View, Text } from "react-native";
-import type { KeyEvent } from "@opentui/core";
 import { useShortcut } from "../lib/shortcuts/hooks";
 import type { Key } from "../lib/shortcuts";
 
 const HEADER_COLOR = "#7158e2";
-const TABLE_COLORS = ["#ddd", "#eee"];
-const SELECTED_COLOR = "#f7b730";
+
+const COLORS = {
+  focused: "#ddd",
+  selected: "#eaebf6",
+  focused_selected: "#d5d7ef",
+};
 
 const EXTRA = 5;
 
@@ -24,7 +20,7 @@ interface TableState {
   columns: Column[];
   columnMap: Map<string, number>;
   idx: number;
-  selectedFrom: number | undefined;
+  selectedIdx: Set<number>;
 }
 
 const INITAL_STATE = {
@@ -32,7 +28,7 @@ const INITAL_STATE = {
   columns: [],
   columnMap: new Map(),
   idx: 0,
-  selectedFrom: undefined,
+  selectedIdx: new Set(),
 } satisfies TableState;
 
 export const Context = createContext<TableState>(INITAL_STATE);
@@ -69,7 +65,7 @@ export function Provider<T extends ValidRecord>({
   shortcuts,
 }: ProviderProps<T>) {
   const [idx, setIdx] = useState(0);
-  const [selectedFrom, setSelectedFrom] = useState<number>();
+  const [selectedIdx, setSelectedIdx] = useState(new Set<number>());
 
   useShortcut("j", () => {
     setIdx((prev) => Math.min(prev + 1, data.length - 1));
@@ -84,6 +80,17 @@ export function Provider<T extends ValidRecord>({
     setIdx((prev) => Math.max(prev - 1, 0));
   });
 
+  useShortcut("escape", () => {
+    setSelectedIdx(new Set());
+  });
+  useShortcut("x", () => {
+    setSelectedIdx((last) => {
+      const newSelected = new Set(last);
+      newSelected.add(idx);
+      return newSelected;
+    });
+  });
+
   useEffect(() => {
     setIdx((prev) => Math.max(Math.min(prev, data.length - 1), 0));
   }, [data]);
@@ -91,9 +98,9 @@ export function Provider<T extends ValidRecord>({
   if (shortcuts) {
     for (const shortcut of shortcuts) {
       useShortcut(shortcut.key, () => {
-        const from = selectedFrom ? Math.min(idx, selectedFrom) : idx;
-        const to = selectedFrom ? Math.max(idx, selectedFrom) : idx;
-        const selected = data.slice(from, to + 1);
+        const selected = data.filter(
+          (_, index) => idx == index || selectedIdx.has(index),
+        );
         shortcut.handler({ selected, index: idx });
       });
     }
@@ -112,14 +119,14 @@ export function Provider<T extends ValidRecord>({
   );
 
   return (
-    <Context.Provider value={{ data, columns, columnMap, idx, selectedFrom }}>
+    <Context.Provider value={{ data, columns, columnMap, idx, selectedIdx }}>
       {children}
     </Context.Provider>
   );
 }
 
 export function Body() {
-  const { columns, data, columnMap, idx, selectedFrom } = use(Context);
+  const { columns, data, columnMap, idx, selectedIdx } = use(Context);
   return (
     <View>
       <View style={{ backgroundColor: HEADER_COLOR, flexDirection: "row" }}>
@@ -136,19 +143,21 @@ export function Body() {
         ))}
       </View>
       {data.map((row, index) => {
-        const isSelected =
-          index == idx ||
-          (selectedFrom != undefined &&
-            ((selectedFrom <= index && index <= idx) ||
-              (idx <= index && index <= selectedFrom)));
+        const isSelected = selectedIdx.has(index);
+        const isFocused = index == idx;
 
         return (
           <View
             key={index}
             style={{
-              backgroundColor: isSelected
-                ? SELECTED_COLOR
-                : TABLE_COLORS[index % 2],
+              backgroundColor:
+                isSelected && isFocused
+                  ? COLORS.focused_selected
+                  : isFocused
+                    ? COLORS.focused
+                    : isSelected
+                      ? COLORS.selected
+                      : undefined,
             }}
           >
             <TableRow

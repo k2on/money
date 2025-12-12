@@ -10,7 +10,12 @@ import {
 import { useQuery, useZero } from "@rocicorp/zero/react";
 import * as Table from "../components/Table";
 import { Button } from "../components/Button";
-import * as Dialog from "../components/Dialog";
+import { RenameCategoryDialog } from "./budget/RenameCategoryDialog";
+import {
+  UpdateCategoryAmountDialog,
+  type CategoryWithComputed,
+  type Updating,
+} from "./budget/UpdateCategoryAmountDialog";
 
 const COLUMNS: Table.Column[] = [
   { name: "label", label: "Name" },
@@ -24,9 +29,9 @@ export function Budget() {
   const { auth } = use(RouterContext);
   const [budgets] = useQuery(queries.getBudgets(auth));
   const [renaming, setRenaming] = useState<Category>();
+  const [editCategoryAmount, setEditCategoryAmount] = useState<Updating>();
 
   const z = useZero<Schema, Mutators>();
-  const refText = useRef("");
 
   const newBudget = () => {
     const id = new Date().getTime().toString();
@@ -60,8 +65,8 @@ export function Budget() {
 
   const data = budget.categories.slice().map((category) => {
     const { amount } = category;
-    const week = amount;
-    const month = amount * 4;
+    const week = amount / 4;
+    const month = amount;
     const year = amount * 12;
 
     return {
@@ -79,7 +84,7 @@ export function Budget() {
     z.mutate.budget.createCategory({
       id,
       budgetId: budget.id,
-      order: index - 1,
+      order: index,
     });
   };
 
@@ -95,38 +100,37 @@ export function Budget() {
     }
   };
 
+  const onEditCategoryYearly = ({
+    selected,
+  }: { selected: CategoryWithComputed[] }) => {
+    for (const category of selected) {
+      setEditCategoryAmount({ category, every: "year" });
+    }
+  };
+
+  const onEditCategoryMonthly = ({
+    selected,
+  }: { selected: CategoryWithComputed[] }) => {
+    for (const category of selected) {
+      setEditCategoryAmount({ category, every: "month" });
+    }
+  };
+
+  const onEditCategoryWeekly = ({
+    selected,
+  }: { selected: CategoryWithComputed[] }) => {
+    for (const category of selected) {
+      setEditCategoryAmount({ category, every: "week" });
+    }
+  };
+
   return (
     <>
-      <Dialog.Provider
-        visible={renaming != undefined}
-        close={() => setRenaming(undefined)}
-      >
-        <Dialog.Content>
-          <Text style={{ fontFamily: "mono" }}>Edit Category</Text>
-
-          <TextInput
-            style={{ fontFamily: "mono" }}
-            autoFocus
-            selectTextOnFocus
-            defaultValue={renaming?.label}
-            onChangeText={(t) => {
-              refText.current = t;
-            }}
-            onKeyPress={(e) => {
-              if (!renaming) return;
-              if (e.nativeEvent.key == "Enter") {
-                z.mutate.budget.updateCategory({
-                  id: renaming.id,
-                  label: refText.current,
-                });
-                setRenaming(undefined);
-              } else if (e.nativeEvent.key == "Escape") {
-                setRenaming(undefined);
-              }
-            }}
-          />
-        </Dialog.Content>
-      </Dialog.Provider>
+      <RenameCategoryDialog renaming={renaming} setRenaming={setRenaming} />
+      <UpdateCategoryAmountDialog
+        updating={editCategoryAmount}
+        setUpdating={setEditCategoryAmount}
+      />
 
       <View style={{ alignItems: "flex-start" }}>
         <Text style={{ fontFamily: "mono", textAlign: "left" }}>
@@ -140,6 +144,9 @@ export function Budget() {
           { key: "i", handler: newCategory },
           { key: "d", handler: deleteCategory },
           { key: "r", handler: renameCategory },
+          { key: "y", handler: onEditCategoryYearly },
+          { key: "m", handler: onEditCategoryMonthly },
+          { key: "w", handler: onEditCategoryWeekly },
         ]}
       >
         <View style={{ flex: 1 }}>

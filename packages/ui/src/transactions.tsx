@@ -40,13 +40,11 @@ export function Transactions() {
     <Table.Provider
       data={items}
       columns={COLUMNS}
-      onKey={(key) => {
-        if (key.name == "r" && key.shift) {
-          z.mutate.link.updateTransactions();
-        }
-      }}
+      shortcuts={[
+        { key: "r", handler: () => z.mutate.link.updateTransactions() },
+      ]}
     >
-      <View style={{ flex: 1 }}>
+      <View style={{ padding: 10, flex: 1 }}>
         <View style={{ flexShrink: 0 }}>
           <Table.Body />
         </View>
@@ -59,18 +57,16 @@ export function Transactions() {
 }
 
 function Selected() {
-  const { data, idx, selectedFrom } = use(Table.Context);
+  const { data, selectedIdx } = use(Table.Context);
 
-  if (selectedFrom == undefined)
+  if (selectedIdx.size == 0)
     return (
       <View style={{ backgroundColor: "#ddd" }}>
         <Text style={{ fontFamily: "mono" }}>No items selected</Text>
       </View>
     );
 
-  const from = Math.min(idx, selectedFrom);
-  const to = Math.max(idx, selectedFrom);
-  const selected = data.slice(from, to + 1) as Transaction[];
+  const selected = data.filter((_, i) => selectedIdx.has(i)) as Transaction[];
   const count = selected.length;
   const sum = selected.reduce((prev, curr) => prev + curr.amount, 0);
 

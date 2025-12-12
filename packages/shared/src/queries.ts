@@ -67,7 +67,7 @@ export const queries = {
       isLoggedIn(authData);
       return builder.budget
         .related("categories", (q) =>
-          q.where("removedAt", "IS", null).orderBy("order", "desc"),
+          q.where("removedAt", "IS", null).orderBy("order", "asc"),
         )
         .limit(10);
     },

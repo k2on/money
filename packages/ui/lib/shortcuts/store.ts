@@ -1,16 +1,18 @@
 import { type RefObject } from "react";
 
-// internal map
-const keys = new Map<string, RefObject<() => void>>();
+export type ScopeKeys = Map<string, RefObject<() => void>>;
 
-// cached snapshot (stable reference)
-let snapshot: [string, RefObject<() => void>][] = [];
+// outer reactive container
+const scopes = new Map<string, ScopeKeys>();
 
-let listeners = new Set<() => void>();
+// stable snapshot for subscribers
+let snapshot: [string, ScopeKeys][] = [];
+
+const listeners = new Set<() => void>();
 
 function emit() {
-  // refresh snapshot ONLY when keys actually change
-  snapshot = Array.from(keys.entries());
+  // replace identity so subscribers re-render
+  snapshot = Array.from(scopes.entries());
   for (const fn of listeners) fn();
 }
 
@@ -21,20 +23,36 @@ export const keysStore = {
   },
 
   getSnapshot() {
-    return snapshot; // stable unless emit() ran
+    return snapshot;
   },
 
-  register(key: string, ref: RefObject<() => void>) {
-    keys.set(key, ref);
+  register(key: string, ref: RefObject<() => void>, scope: string) {
+    const prev = scopes.get(scope);
+    const next = new Map(prev); // <-- important: new identity
+    next.set(key, ref);
+
+    scopes.set(scope, next); // <-- outer identity also changes
     emit();
   },
 
-  deregister(key: string) {
-    keys.delete(key);
+  deregister(key: string, scope: string) {
+    const prev = scopes.get(scope);
+    if (!prev) return;
+
+    const next = new Map(prev);
+    next.delete(key);
+
+    if (next.size === 0) {
+      scopes.delete(scope);
+    } else {
+      scopes.set(scope, next);
+    }
     emit();
   },
 
   getHandler(key: string) {
-    return keys.get(key)?.current;
+    // last scope wins — clarify this logic as needed
+    const last = Array.from(scopes.values()).at(-1);
+    return last?.get(key)?.current;
   },
 };

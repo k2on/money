@@ -11,7 +11,7 @@ import type {
   TextInputProps,
 } from "react-native";
 import { useTerminalDimensions } from "@opentui/react";
-import { RGBA } from "@opentui/core";
+import { BorderSides, RGBA } from "@opentui/core";
 import { platform } from "node:os";
 import { exec } from "node:child_process";
 
@@ -57,15 +57,36 @@ export function View({ children, style }: ViewProps) {
       ? typeof style.backgroundColor == "string"
         ? style.backgroundColor.startsWith("rgba(")
           ? (() => {
-            const parts = style.backgroundColor.split("(")[1].split(")")[0];
-            const [r, g, b, a] = parts.split(",").map(parseFloat);
-            return RGBA.fromInts(r, g, b, a * 255);
-          })()
+              const parts = style.backgroundColor.split("(")[1].split(")")[0];
+              const [r, g, b, a] = parts.split(",").map(parseFloat);
+              return RGBA.fromInts(r, g, b, a * 255);
+            })()
           : style.backgroundColor
         : undefined
       : undefined;
 
   const padding = attr(style, "padding", "number");
+  const paddingTop = attr(style, "paddingTop", "number");
+  const paddingLeft = attr(style, "paddingLeft", "number");
+  const paddingBottom = attr(style, "paddingBottom", "number");
+  const paddingRight = attr(style, "paddingRight", "number");
+  const gap = attr(style, "gap", "number");
+
+  const borderBottomWidth = attr(style, "borderBottomWidth", "number");
+  const borderTopWidth = attr(style, "borderTopWidth", "number");
+  const borderLeftWidth = attr(style, "borderLeftWidth", "number");
+  const borderRightWidth = attr(style, "borderRightWidth", "number");
+
+  const borderBottomColor = attr(style, "borderBottomColor", "string");
+  const borderTopColor = attr(style, "borderTopColor", "string");
+  const borderLeftColor = attr(style, "borderLeftColor", "string");
+  const borderRightColor = attr(style, "borderRightColor", "string");
+
+  const borderColor = attr(style, "borderColor", "string");
+
+  const top = attr(style, "top", "number");
+
+  const width = attr(style, "width", "number");
 
   const props = {
     overflow: attr(style, "overflow", "string"),
@@ -75,7 +96,6 @@ export function View({ children, style }: ViewProps) {
     justifyContent: attr(style, "justifyContent", "string"),
     flexShrink: attr(style, "flexShrink", "number"),
     flexDirection: attr(style, "flexDirection", "string"),
-    top: attr(style, "top", "number"),
     zIndex: attr(style, "zIndex", "number"),
     left: attr(style, "left", "number"),
     right: attr(style, "right", "number"),
@@ -84,13 +104,40 @@ export function View({ children, style }: ViewProps) {
       attr(style, "flex", "number") || attr(style, "flexGrow", "number"),
   };
 
+  const border = (() => {
+    const sides: BorderSides[] = [];
+    if (borderBottomWidth) sides.push("bottom");
+    if (borderTopWidth) sides.push("top");
+    if (borderLeftWidth) sides.push("left");
+    if (borderRightWidth) sides.push("right");
+    if (!sides.length) return undefined;
+    return sides;
+  })();
+
   return (
     <box
       backgroundColor={bg}
-      paddingTop={padding && Math.round(padding / RATIO_HEIGHT)}
-      paddingBottom={padding && Math.round(padding / RATIO_HEIGHT)}
-      paddingLeft={padding && Math.round(padding / RATIO_WIDTH)}
-      paddingRight={padding && Math.round(padding / RATIO_WIDTH)}
+      paddingTop={
+        (paddingTop && Math.round(paddingTop / RATIO_HEIGHT)) ||
+        (padding && Math.round(padding / RATIO_HEIGHT))
+      }
+      paddingBottom={
+        (paddingBottom && Math.round(paddingBottom / RATIO_HEIGHT)) ||
+        (padding && Math.round(padding / RATIO_HEIGHT))
+      }
+      paddingLeft={
+        (paddingLeft && Math.round(paddingLeft / RATIO_WIDTH)) ||
+        (padding && Math.round(padding / RATIO_WIDTH))
+      }
+      paddingRight={
+        (paddingRight && Math.round(paddingRight / RATIO_WIDTH)) ||
+        (padding && Math.round(padding / RATIO_WIDTH))
+      }
+      gap={gap && Math.round(gap / RATIO_HEIGHT)}
+      border={border}
+      borderColor={borderColor}
+      width={width && Math.round(width / RATIO_WIDTH)}
+      top={top && Math.round(top / RATIO_HEIGHT)}
       {...props}
     >
       {children}
@@ -108,10 +155,10 @@ export function Pressable({
       ? typeof style.backgroundColor == "string"
         ? style.backgroundColor.startsWith("rgba(")
           ? (() => {
-            const parts = style.backgroundColor.split("(")[1].split(")")[0];
-            const [r, g, b, a] = parts.split(",").map(parseFloat);
-            return RGBA.fromInts(r, g, b, a * 255);
-          })()
+              const parts = style.backgroundColor.split("(")[1].split(")")[0];
+              const [r, g, b, a] = parts.split(",").map(parseFloat);
+              return RGBA.fromInts(r, g, b, a * 255);
+            })()
           : style.backgroundColor
         : undefined
       : undefined;
@@ -175,9 +222,9 @@ export function Pressable({
       onMouseDown={
         onPress
           ? (_event) => {
-            // @ts-ignore
-            onPress();
-          }
+              // @ts-ignore
+              onPress();
+            }
           : undefined
       }
       backgroundColor={bg}
@@ -234,7 +281,8 @@ export function TextInput({
 }: TextInputProps) {
   return (
     <input
-      width={20}
+      minWidth={20}
+      minHeight={1}
       backgroundColor="white"
       textColor="black"
       focused={true}
