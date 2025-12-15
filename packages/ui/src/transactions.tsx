@@ -40,9 +40,7 @@ export function Transactions() {
     <Table.Provider
       data={items}
       columns={COLUMNS}
-      shortcuts={[
-        { key: "r", handler: () => z.mutate.link.updateTransactions() },
-      ]}
+      shortcuts={[{ key: "r", handler: () => z.mutate.link.sync() }]}
     >
       <View style={{ padding: 10, flex: 1 }}>
         <View style={{ flexShrink: 0 }}>

@@ -10,8 +10,10 @@ export function createMutators(authData: AuthData | null) {
     link: {
       async create() {},
       async get(tx: Tx, { link_token }: { link_token: string }) {},
-      async updateTransactions() {},
-      async updateBalences() {},
+      async webhook() {},
+      async sync() {},
+      // async updateTransactions() {},
+      // async updateBalences() {},
       async deleteAccounts(tx: Tx, { accountIds }: { accountIds: string[] }) {
         isLoggedIn(authData);
         for (const id of accountIds) {

@@ -65,6 +65,7 @@ export const plaidAccessTokens = pgTable("plaidAccessToken", {
   logoUrl: text("logoUrl").notNull(),
   userId: text("user_id").notNull(),
   token: text("token").notNull(),
+  syncCursor: text("sync_cursor"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

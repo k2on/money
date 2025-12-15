@@ -345,6 +345,16 @@ export const schema = {
             "token"
           >,
         },
+        syncCursor: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "plaidAccessTokens",
+            "syncCursor"
+          >,
+          serverName: "sync_cursor",
+        },
         createdAt: {
           type: "number",
           optional: true,

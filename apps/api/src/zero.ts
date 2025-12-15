@@ -26,6 +26,8 @@ import {
   PlaidApi,
   PlaidEnvironments,
   Products,
+  SandboxItemFireWebhookRequestWebhookCodeEnum,
+  WebhookType,
 } from "plaid";
 import { randomUUID } from "crypto";
 import { db } from "./db";
@@ -35,8 +37,16 @@ import {
   plaidLink,
   transaction,
 } from "@money/shared/db";
-import { and, eq, inArray, sql, type InferInsertModel } from "drizzle-orm";
+import {
+  and,
+  eq,
+  inArray,
+  sql,
+  type InferInsertModel,
+  type InferSelectModel,
+} from "drizzle-orm";
 import { plaidClient } from "./plaid";
+import { transactionFromPlaid } from "./plaid/tx";
 
 const processor = new PushProcessor(
   new ZQLDatabase(
@@ -128,9 +138,9 @@ const createMutators = (authData: AuthData | null) => {
           throw Error("Plaid error");
         }
       },
-
-      async updateTransactions() {
+      async webhook() {
         isLoggedIn(authData);
+
         const accounts = await db.query.plaidAccessTokens.findMany({
           where: eq(plaidAccessTokens.userId, authData.user.id),
         });
@@ -139,51 +149,20 @@ const createMutators = (authData: AuthData | null) => {
           return;
         }
 
-        for (const account of accounts) {
-          const { data } = await plaidClient.transactionsGet({
-            access_token: account.token,
-            start_date: "2025-10-01",
-            end_date: new Date().toISOString().split("T")[0],
-          });
+        const account = accounts.at(0)!;
 
-          const transactions = data.transactions.map(
-            (tx) =>
-              ({
-                id: randomUUID(),
-                user_id: authData.user.id,
-                plaid_id: tx.transaction_id,
-                account_id: tx.account_id,
-                name: tx.name,
-                amount: tx.amount as any,
-                datetime: tx.datetime
-                  ? new Date(tx.datetime)
-                  : new Date(tx.date),
-                authorized_datetime: tx.authorized_datetime
-                  ? new Date(tx.authorized_datetime)
-                  : undefined,
-                json: JSON.stringify(tx),
-              }) satisfies InferInsertModel<typeof transaction>,
-          );
+        const { data } = await plaidClient.sandboxItemFireWebhook({
+          access_token: account.token,
+          webhook_type: WebhookType.Transactions,
+          webhook_code:
+            SandboxItemFireWebhookRequestWebhookCodeEnum.DefaultUpdate,
+        });
 
-          await db
-            .insert(transaction)
-            .values(transactions)
-            .onConflictDoNothing({
-              target: transaction.plaid_id,
-            });
-
-          const txReplacingPendingIds = data.transactions
-            .filter((t) => t.pending_transaction_id)
-            .map((t) => t.pending_transaction_id!);
-
-          await db
-            .delete(transaction)
-            .where(inArray(transaction.plaid_id, txReplacingPendingIds));
-        }
+        console.log(data);
       },
-
-      async updateBalences() {
+      async sync() {
         isLoggedIn(authData);
+
         const accounts = await db.query.plaidAccessTokens.findMany({
           where: eq(plaidAccessTokens.userId, authData.user.id),
         });
@@ -192,32 +171,150 @@ const createMutators = (authData: AuthData | null) => {
           return;
         }
 
-        for (const account of accounts) {
-          const { data } = await plaidClient.accountsBalanceGet({
-            access_token: account.token,
-          });
-          await db
-            .insert(balance)
-            .values(
-              data.accounts.map((bal) => ({
-                id: randomUUID(),
-                user_id: authData.user.id,
-                plaid_id: bal.account_id,
-                avaliable: bal.balances.available as any,
-                current: bal.balances.current as any,
-                name: bal.name,
-                tokenId: account.id,
-              })),
-            )
-            .onConflictDoUpdate({
-              target: balance.plaid_id,
-              set: {
-                current: sql.raw(`excluded.${balance.current.name}`),
-                avaliable: sql.raw(`excluded.${balance.avaliable.name}`),
-              },
-            });
-        }
+        const account = accounts.at(0)!;
+
+        const { data } = await plaidClient.transactionsSync({
+          access_token: account.token,
+          cursor: account.syncCursor || undefined,
+        });
+
+        const added = data.added.map((tx) =>
+          transactionFromPlaid(authData.user.id, tx),
+        );
+
+        const updated = data.modified.map((tx) =>
+          transactionFromPlaid(authData.user.id, tx),
+        );
+
+        console.log("added", added.length);
+        console.log("updated", updated.length);
+        console.log("removed", data.removed.length);
+        console.log("next cursor", data.next_cursor);
+
+        await db.transaction(async (tx) => {
+          if (added.length) {
+            await tx.insert(transaction).values(added);
+          }
+
+          if (updated.length) {
+            await tx
+              .insert(transaction)
+              .values(updated)
+              .onConflictDoUpdate({
+                target: transaction.plaid_id,
+                set: {
+                  name: sql.raw(`excluded.${transaction.name.name}`),
+                  amount: sql.raw(`excluded.${transaction.amount.name}`),
+                  json: sql.raw(`excluded.${transaction.json.name}`),
+                },
+              });
+          }
+
+          if (data.removed.length) {
+            await tx.delete(transaction).where(
+              inArray(
+                transaction.id,
+                data.removed.map((tx) => tx.transaction_id),
+              ),
+            );
+          }
+
+          await tx
+            .update(plaidAccessTokens)
+            .set({ syncCursor: data.next_cursor })
+            .where(eq(plaidAccessTokens.id, account.id));
+        });
       },
+
+      // async updateTransactions() {
+      //   isLoggedIn(authData);
+      //   const accounts = await db.query.plaidAccessTokens.findMany({
+      //     where: eq(plaidAccessTokens.userId, authData.user.id),
+      //   });
+      //   if (accounts.length == 0) {
+      //     console.error("No accounts");
+      //     return;
+      //   }
+      //
+      //   for (const account of accounts) {
+      //     const { data } = await plaidClient.transactionsGet({
+      //       access_token: account.token,
+      //       start_date: "2025-10-01",
+      //       end_date: new Date().toISOString().split("T")[0],
+      //     });
+      //
+      //     const transactions = data.transactions.map(
+      //       (tx) =>
+      //         ({
+      //           id: randomUUID(),
+      //           user_id: authData.user.id,
+      //           plaid_id: tx.transaction_id,
+      //           account_id: tx.account_id,
+      //           name: tx.name,
+      //           amount: tx.amount as any,
+      //           datetime: tx.datetime
+      //             ? new Date(tx.datetime)
+      //             : new Date(tx.date),
+      //           authorized_datetime: tx.authorized_datetime
+      //             ? new Date(tx.authorized_datetime)
+      //             : undefined,
+      //           json: JSON.stringify(tx),
+      //         }) satisfies InferInsertModel<typeof transaction>,
+      //     );
+      //
+      //     await db
+      //       .insert(transaction)
+      //       .values(transactions)
+      //       .onConflictDoNothing({
+      //         target: transaction.plaid_id,
+      //       });
+      //
+      //     const txReplacingPendingIds = data.transactions
+      //       .filter((t) => t.pending_transaction_id)
+      //       .map((t) => t.pending_transaction_id!);
+      //
+      //     await db
+      //       .delete(transaction)
+      //       .where(inArray(transaction.plaid_id, txReplacingPendingIds));
+      //   }
+      // },
+      //
+      // async updateBalences() {
+      //   isLoggedIn(authData);
+      //   const accounts = await db.query.plaidAccessTokens.findMany({
+      //     where: eq(plaidAccessTokens.userId, authData.user.id),
+      //   });
+      //   if (accounts.length == 0) {
+      //     console.error("No accounts");
+      //     return;
+      //   }
+      //
+      //   for (const account of accounts) {
+      //     const { data } = await plaidClient.accountsBalanceGet({
+      //       access_token: account.token,
+      //     });
+      //     await db
+      //       .insert(balance)
+      //       .values(
+      //         data.accounts.map((bal) => ({
+      //           id: randomUUID(),
+      //           user_id: authData.user.id,
+      //           plaid_id: bal.account_id,
+      //           avaliable: bal.balances.available as any,
+      //           current: bal.balances.current as any,
+      //           name: bal.name,
+      //           tokenId: account.id,
+      //         })),
+      //       )
+      //       .onConflictDoUpdate({
+      //         target: balance.plaid_id,
+      //         set: {
+      //           current: sql.raw(`excluded.${balance.current.name}`),
+      //           avaliable: sql.raw(`excluded.${balance.avaliable.name}`),
+      //         },
+      //       });
+      //   }
+      // },
     },
   } as const satisfies Mutators;
 };
