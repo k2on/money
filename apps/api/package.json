@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.19.5",
-    "@money/shared": "workspace:*",
+    "@money/shared": "*",
     "better-auth": "^1.3.27",
     "hono": "^4.9.12",
     "plaid": "^39.0.0",

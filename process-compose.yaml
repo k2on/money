@@ -26,16 +26,16 @@ processes:
       period_seconds: 1
 
   tailscale_machine_name:
-    command: "pnpm tsx ./scripts/set-machine-name.ts"
+    command: "bun tsx ./scripts/set-machine-name.ts"
 
   expo:
-    command: "pnpm --filter=@money/expo start"
+    command: "bun --filter=@money/expo start"
     depends_on:
       tailscale_machine_name:
         condition: process_completed_successfully
 
   api:
-    command: "pnpm --filter=@money/api dev"
+    command: "bun --filter=@money/api dev"
 
   migrate:
     command: |
@@ -51,13 +51,13 @@ processes:
       db:
         condition: process_healthy
   zero:
-    command: npx zero-cache-dev -p packages/shared/src/schema.ts
+    command: bunx zero-cache-dev -p packages/shared/src/schema.ts
     depends_on:
       migrate:
         condition: process_completed_successfully
 
   studio:
-    command: npx drizzle-kit studio
+    command: bunx drizzle-kit studio
     working_dir: ./packages/shared
     depends_on:
       db:

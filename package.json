@@ -3,12 +3,14 @@
   "private": true,
   "scripts": {
     "dev": "process-compose up -p 0",
-    "tui": "pnpm --filter=@money/tui run build && pnpm --filter=@money/tui run start",
-    "db:gen": "pnpm --filter=@money/shared db:gen",
-    "db:push": "pnpm --filter=@money/shared db:push"
+    "tui": "bun --filter=@money/tui run build && bun --filter=@money/tui run start",
+    "db:gen": "bun --filter=@money/shared db:gen",
+    "db:push": "bun --filter=@money/shared db:push"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": ["@rocicorp/zero-sqlite3"],
-    "ignoredBuiltDependencies": ["esbuild", "protobufjs", "unrs-resolver"]
-  }
+  "workspaces": ["apps/*", "packages/*"],
+  "trustedDependencies": [
+    "@rocicorp/zero-sqlite3",
+    "protobufjs",
+    "unrs-resolver"
+  ]
 }
