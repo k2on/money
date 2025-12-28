@@ -21,97 +21,6 @@ type ZeroSchema = DrizzleToZeroSchema<typeof drizzleSchema>;
  */
 export const schema = {
   tables: {
-    balance: {
-      name: "balance",
-      columns: {
-        id: {
-          type: "string",
-          optional: false,
-          customType: null as unknown as ZeroCustomType<
-            ZeroSchema,
-            "balance",
-            "id"
-          >,
-        },
-        user_id: {
-          type: "string",
-          optional: false,
-          customType: null as unknown as ZeroCustomType<
-            ZeroSchema,
-            "balance",
-            "user_id"
-          >,
-          serverName: "userId",
-        },
-        plaid_id: {
-          type: "string",
-          optional: false,
-          customType: null as unknown as ZeroCustomType<
-            ZeroSchema,
-            "balance",
-            "plaid_id"
-          >,
-          serverName: "plaidId",
-        },
-        avaliable: {
-          type: "number",
-          optional: false,
-          customType: null as unknown as ZeroCustomType<
-            ZeroSchema,
-            "balance",
-            "avaliable"
-          >,
-        },
-        current: {
-          type: "number",
-          optional: false,
-          customType: null as unknown as ZeroCustomType<
-            ZeroSchema,
-            "balance",
-            "current"
-          >,
-        },
-        name: {
-          type: "string",
-          optional: false,
-          customType: null as unknown as ZeroCustomType<
-            ZeroSchema,
-            "balance",
-            "name"
-          >,
-        },
-        tokenId: {
-          type: "string",
-          optional: false,
-          customType: null as unknown as ZeroCustomType<
-            ZeroSchema,
-            "balance",
-            "tokenId"
-          >,
-        },
-        createdAt: {
-          type: "number",
-          optional: true,
-          customType: null as unknown as ZeroCustomType<
-            ZeroSchema,
-            "balance",
-            "createdAt"
-          >,
-          serverName: "created_at",
-        },
-        updatedAt: {
-          type: "number",
-          optional: true,
-          customType: null as unknown as ZeroCustomType<
-            ZeroSchema,
-            "balance",
-            "updatedAt"
-          >,
-          serverName: "updated_at",
-        },
-      },
-      primaryKey: ["id"],
-    },
     budget: {
       name: "budget",
       columns: {
@@ -369,6 +278,86 @@ export const schema = {
       primaryKey: ["id"],
       serverName: "plaidAccessToken",
     },
+    plaidAccounts: {
+      name: "plaidAccounts",
+      columns: {
+        id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "plaidAccounts",
+            "id"
+          >,
+        },
+        user_id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "plaidAccounts",
+            "user_id"
+          >,
+        },
+        token_id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "plaidAccounts",
+            "token_id"
+          >,
+        },
+        name: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "plaidAccounts",
+            "name"
+          >,
+        },
+        type: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "plaidAccounts",
+            "type"
+          >,
+        },
+        mask: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "plaidAccounts",
+            "mask"
+          >,
+        },
+        createdAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "plaidAccounts",
+            "createdAt"
+          >,
+          serverName: "created_at",
+        },
+        updatedAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "plaidAccounts",
+            "updatedAt"
+          >,
+          serverName: "updated_at",
+        },
+      },
+      primaryKey: ["id"],
+    },
     plaidLink: {
       name: "plaidLink",
       columns: {
@@ -452,15 +441,6 @@ export const schema = {
             "user_id"
           >,
         },
-        plaid_id: {
-          type: "string",
-          optional: false,
-          customType: null as unknown as ZeroCustomType<
-            ZeroSchema,
-            "transaction",
-            "plaid_id"
-          >,
-        },
         account_id: {
           type: "string",
           optional: false,
@@ -513,6 +493,24 @@ export const schema = {
             ZeroSchema,
             "transaction",
             "json"
+          >,
+        },
+        category_id: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "transaction",
+            "category_id"
+          >,
+        },
+        category_assigned_by: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "transaction",
+            "category_assigned_by"
           >,
         },
         createdAt: {
@@ -613,6 +611,16 @@ export const schema = {
     },
   },
   relationships: {
+    plaidAccounts: {
+      transaction: [
+        {
+          sourceField: ["id"],
+          destField: ["account_id"],
+          destSchema: "transaction",
+          cardinality: "many",
+        },
+      ],
+    },
     budget: {
       categories: [
         {
@@ -632,6 +640,32 @@ export const schema = {
           cardinality: "one",
         },
       ],
+      transactions: [
+        {
+          sourceField: ["id"],
+          destField: ["category_id"],
+          destSchema: "transaction",
+          cardinality: "many",
+        },
+      ],
+    },
+    transaction: {
+      account: [
+        {
+          sourceField: ["account_id"],
+          destField: ["id"],
+          destSchema: "plaidAccounts",
+          cardinality: "one",
+        },
+      ],
+      category: [
+        {
+          sourceField: ["category_id"],
+          destField: ["id"],
+          destSchema: "category",
+          cardinality: "one",
+        },
+      ],
     },
   },
   enableLegacyQueries: false,
@@ -643,11 +677,6 @@ export const schema = {
  * This type is auto-generated from your Drizzle schema definition.
  */
 export type Schema = typeof schema;
-/**
- * Represents a row from the "balance" table.
- * This type is auto-generated from your Drizzle schema definition.
- */
-export type Balance = Row<Schema["tables"]["balance"]>;
 /**
  * Represents a row from the "budget" table.
  * This type is auto-generated from your Drizzle schema definition.
@@ -663,6 +692,11 @@ export type Category = Row<Schema["tables"]["category"]>;
  * This type is auto-generated from your Drizzle schema definition.
  */
 export type PlaidAccessToken = Row<Schema["tables"]["plaidAccessTokens"]>;
+/**
+ * Represents a row from the "plaidAccounts" table.
+ * This type is auto-generated from your Drizzle schema definition.
+ */
+export type PlaidAccount = Row<Schema["tables"]["plaidAccounts"]>;
 /**
  * Represents a row from the "plaidLink" table.
  * This type is auto-generated from your Drizzle schema definition.

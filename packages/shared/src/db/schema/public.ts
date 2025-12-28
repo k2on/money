@@ -24,20 +24,6 @@ export const users = pgTable(
   (table) => [uniqueIndex("user_email_unique").on(table.email)],
 );
 
-export const transaction = pgTable("transaction", {
-  id: text("id").primaryKey(),
-  user_id: text("user_id").notNull(),
-  plaid_id: text("plaid_id").notNull().unique(),
-  account_id: text("account_id").notNull(),
-  name: text("name").notNull(),
-  amount: decimal("amount").notNull(),
-  datetime: timestamp("datetime"),
-  authorized_datetime: timestamp("authorized_datetime"),
-  json: text("json"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
-
 export const plaidLink = pgTable("plaidLink", {
   id: text("id").primaryKey(),
   user_id: text("user_id").notNull(),
@@ -45,18 +31,6 @@ export const plaidLink = pgTable("plaidLink", {
   token: text("token").notNull(),
   completeAt: timestamp("complete_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
-
-export const balance = pgTable("balance", {
-  id: text("id").primaryKey(),
-  user_id: text("userId").notNull(),
-  plaid_id: text("plaidId").notNull().unique(),
-  avaliable: decimal("avaliable").notNull(),
-  current: decimal("current").notNull(),
-  name: text("name").notNull(),
-  tokenId: text("tokenId").notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const plaidAccessTokens = pgTable("plaidAccessToken", {
@@ -68,6 +42,51 @@ export const plaidAccessTokens = pgTable("plaidAccessToken", {
   syncCursor: text("sync_cursor"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
+
+export const plaidAccounts = pgTable("plaidAccounts", {
+  id: text("id").primaryKey(),
+  user_id: text("user_id").notNull(),
+  token_id: text("token_id")
+    .notNull()
+    .references(() => plaidAccessTokens.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  type: text("type").notNull(),
+  mask: text("mask").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const transaction = pgTable("transaction", {
+  id: text("id").primaryKey(),
+  user_id: text("user_id").notNull(),
+  account_id: text("account_id")
+    .notNull()
+    .references(() => plaidAccounts.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  amount: decimal("amount").notNull(),
+  datetime: timestamp("datetime"),
+  authorized_datetime: timestamp("authorized_datetime"),
+  json: text("json"),
+  category_id: text("category_id"),
+  category_assigned_by: text("category_assigned_by"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const accountRelations = relations(plaidAccounts, ({ many }) => ({
+  transaction: many(transaction),
+}));
+
+export const transactionRelations = relations(transaction, ({ one }) => ({
+  account: one(plaidAccounts, {
+    fields: [transaction.account_id],
+    references: [plaidAccounts.id],
+  }),
+  category: one(category, {
+    fields: [transaction.category_id],
+    references: [category.id],
+  }),
+}));
 
 export const budget = pgTable("budget", {
   id: text("id").primaryKey(),
@@ -97,9 +116,10 @@ export const budgetRelations = relations(budget, ({ many }) => ({
   categories: many(category),
 }));
 
-export const categoryRelations = relations(category, ({ one }) => ({
+export const categoryRelations = relations(category, ({ one, many }) => ({
   budget: one(budget, {
     fields: [category.budgetId],
     references: [budget.id],
   }),
+  transactions: many(transaction),
 }));

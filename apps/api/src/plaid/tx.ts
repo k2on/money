@@ -8,9 +8,8 @@ export function transactionFromPlaid(
   tx: Transaction,
 ): InferInsertModel<typeof transaction> {
   return {
-    id: randomUUID(),
+    id: tx.transaction_id,
     user_id: userId,
-    plaid_id: tx.transaction_id,
     account_id: tx.account_id,
     name: tx.name,
     amount: tx.amount as any,

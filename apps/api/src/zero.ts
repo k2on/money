@@ -1,50 +1,40 @@
 import {
+  createMutators as createMutatorsShared,
+  isLoggedIn,
+  type Mutators,
+  queries,
+  type Schema,
+  schema,
+} from "@money/shared";
+import type { AuthData } from "@money/shared/auth";
+import {
+  plaidAccessTokens,
+  plaidAccounts,
+  plaidLink,
+  transaction,
+} from "@money/shared/db";
+import {
   type ReadonlyJSONValue,
   type Transaction,
   withValidation,
 } from "@rocicorp/zero";
+import { PostgresJSConnection } from "@rocicorp/zero/pg";
 import {
   handleGetQueriesRequest,
   PushProcessor,
   ZQLDatabase,
 } from "@rocicorp/zero/server";
-import { PostgresJSConnection } from "@rocicorp/zero/pg";
-import postgres from "postgres";
+import { randomUUID } from "crypto";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import {
-  createMutators as createMutatorsShared,
-  isLoggedIn,
-  queries,
-  schema,
-  type Mutators,
-  type Schema,
-} from "@money/shared";
-import type { AuthData } from "@money/shared/auth";
-import { getHono } from "./hono";
-import {
-  Configuration,
   CountryCode,
-  PlaidApi,
-  PlaidEnvironments,
   Products,
   SandboxItemFireWebhookRequestWebhookCodeEnum,
   WebhookType,
 } from "plaid";
-import { randomUUID } from "crypto";
+import postgres from "postgres";
 import { db } from "./db";
-import {
-  balance,
-  plaidAccessTokens,
-  plaidLink,
-  transaction,
-} from "@money/shared/db";
-import {
-  and,
-  eq,
-  inArray,
-  sql,
-  type InferInsertModel,
-  type InferSelectModel,
-} from "drizzle-orm";
+import { getHono } from "./hono";
 import { plaidClient } from "./plaid";
 import { transactionFromPlaid } from "./plaid/tx";
 
@@ -55,7 +45,7 @@ const processor = new PushProcessor(
   ),
 );
 
-type Tx = Transaction<Schema>;
+// type Tx = Transaction<Schema>;
 
 const createMutators = (authData: AuthData | null) => {
   const mutators = createMutatorsShared(authData);
@@ -106,6 +96,7 @@ const createMutators = (authData: AuthData | null) => {
           });
           if (!linkResp) throw Error("No link respo");
 
+          console.log("linkResp");
           console.log(JSON.stringify(linkResp.data, null, 4));
 
           const item_add_result = linkResp.data.link_sessions
@@ -119,8 +110,11 @@ const createMutators = (authData: AuthData | null) => {
             public_token: item_add_result.public_token,
           });
 
+          console.log("data", data);
+
+          const token_id = randomUUID();
           await db.insert(plaidAccessTokens).values({
-            id: randomUUID(),
+            id: token_id,
             userId: authData.user.id,
             token: data.access_token,
             logoUrl: "",
@@ -133,6 +127,21 @@ const createMutators = (authData: AuthData | null) => {
               completeAt: new Date(),
             })
             .where(eq(plaidLink.token, link_token));
+
+          for (const account of item_add_result.accounts) {
+            if (account.id == undefined) {
+              console.error("account has not id", account);
+              continue;
+            }
+            await db.insert(plaidAccounts).values({
+              id: account.id,
+              user_id: authData.user.id,
+              token_id: token_id,
+              name: account.name || "unknown",
+              type: account.type || "unknown",
+              mask: account.mask || "0000",
+            });
+          }
         } catch (e) {
           console.error(e);
           throw Error("Plaid error");
@@ -201,7 +210,7 @@ const createMutators = (authData: AuthData | null) => {
               .insert(transaction)
               .values(updated)
               .onConflictDoUpdate({
-                target: transaction.plaid_id,
+                target: transaction.id,
                 set: {
                   name: sql.raw(`excluded.${transaction.name.name}`),
                   amount: sql.raw(`excluded.${transaction.amount.name}`),
@@ -225,96 +234,6 @@ const createMutators = (authData: AuthData | null) => {
             .where(eq(plaidAccessTokens.id, account.id));
         });
       },
-
-      // async updateTransactions() {
-      //   isLoggedIn(authData);
-      //   const accounts = await db.query.plaidAccessTokens.findMany({
-      //     where: eq(plaidAccessTokens.userId, authData.user.id),
-      //   });
-      //   if (accounts.length == 0) {
-      //     console.error("No accounts");
-      //     return;
-      //   }
-      //
-      //   for (const account of accounts) {
-      //     const { data } = await plaidClient.transactionsGet({
-      //       access_token: account.token,
-      //       start_date: "2025-10-01",
-      //       end_date: new Date().toISOString().split("T")[0],
-      //     });
-      //
-      //     const transactions = data.transactions.map(
-      //       (tx) =>
-      //         ({
-      //           id: randomUUID(),
-      //           user_id: authData.user.id,
-      //           plaid_id: tx.transaction_id,
-      //           account_id: tx.account_id,
-      //           name: tx.name,
-      //           amount: tx.amount as any,
-      //           datetime: tx.datetime
-      //             ? new Date(tx.datetime)
-      //             : new Date(tx.date),
-      //           authorized_datetime: tx.authorized_datetime
-      //             ? new Date(tx.authorized_datetime)
-      //             : undefined,
-      //           json: JSON.stringify(tx),
-      //         }) satisfies InferInsertModel<typeof transaction>,
-      //     );
-      //
-      //     await db
-      //       .insert(transaction)
-      //       .values(transactions)
-      //       .onConflictDoNothing({
-      //         target: transaction.plaid_id,
-      //       });
-      //
-      //     const txReplacingPendingIds = data.transactions
-      //       .filter((t) => t.pending_transaction_id)
-      //       .map((t) => t.pending_transaction_id!);
-      //
-      //     await db
-      //       .delete(transaction)
-      //       .where(inArray(transaction.plaid_id, txReplacingPendingIds));
-      //   }
-      // },
-      //
-      // async updateBalences() {
-      //   isLoggedIn(authData);
-      //   const accounts = await db.query.plaidAccessTokens.findMany({
-      //     where: eq(plaidAccessTokens.userId, authData.user.id),
-      //   });
-      //   if (accounts.length == 0) {
-      //     console.error("No accounts");
-      //     return;
-      //   }
-      //
-      //   for (const account of accounts) {
-      //     const { data } = await plaidClient.accountsBalanceGet({
-      //       access_token: account.token,
-      //     });
-      //     await db
-      //       .insert(balance)
-      //       .values(
-      //         data.accounts.map((bal) => ({
-      //           id: randomUUID(),
-      //           user_id: authData.user.id,
-      //           plaid_id: bal.account_id,
-      //           avaliable: bal.balances.available as any,
-      //           current: bal.balances.current as any,
-      //           name: bal.name,
-      //           tokenId: account.id,
-      //         })),
-      //       )
-      //       .onConflictDoUpdate({
-      //         target: balance.plaid_id,
-      //         set: {
-      //           current: sql.raw(`excluded.${balance.current.name}`),
-      //           avaliable: sql.raw(`excluded.${balance.avaliable.name}`),
-      //         },
-      //       });
-      //   }
-      // },
     },
   } as const satisfies Mutators;
 };

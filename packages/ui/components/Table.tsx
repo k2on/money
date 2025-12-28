@@ -13,7 +13,10 @@ const COLORS = {
 
 const EXTRA = 5;
 
-export type ValidRecord = Record<string, string | number | null>;
+export type ValidRecord = Record<
+  string,
+  string | number | null | undefined | unknown
+>;
 
 interface TableState {
   data: unknown[];

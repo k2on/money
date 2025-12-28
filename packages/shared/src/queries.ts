@@ -16,8 +16,9 @@ export const queries = {
       isLoggedIn(authData);
       return builder.transaction
         .where("user_id", "=", authData.user.id)
-        .orderBy("datetime", "desc")
-        .limit(50);
+        .related("account")
+        .related("category")
+        .orderBy("datetime", "desc");
     },
   ),
   getPlaidLink: syncedQueryWithContext(
@@ -40,12 +41,12 @@ export const queries = {
         .one();
     },
   ),
-  getBalances: syncedQueryWithContext(
-    "getBalances",
+  getAccounts: syncedQueryWithContext(
+    "getAccounts",
     z.tuple([]),
     (authData: AuthData | null) => {
       isLoggedIn(authData);
-      return builder.balance
+      return builder.plaidAccounts
         .where("user_id", "=", authData.user.id)
         .orderBy("name", "asc");
     },

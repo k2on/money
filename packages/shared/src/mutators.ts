@@ -1,5 +1,5 @@
 import type { Transaction } from "@rocicorp/zero";
-import { authDataSchema, type AuthData } from "./auth";
+import { type AuthData, authDataSchema } from "./auth";
 import { type Category, type Schema } from "./zero-schema.gen";
 import { isLoggedIn } from "./zql";
 
@@ -8,10 +8,10 @@ type Tx = Transaction<Schema>;
 export function createMutators(authData: AuthData | null) {
   return {
     link: {
-      async create() {},
-      async get(tx: Tx, { link_token }: { link_token: string }) {},
-      async webhook() {},
-      async sync() {},
+      async create() { },
+      async get(tx: Tx, { link_token }: { link_token: string }) { },
+      async webhook() { },
+      async sync() { },
       // async updateTransactions() {},
       // async updateBalences() {},
       async deleteAccounts(tx: Tx, { accountIds }: { accountIds: string[] }) {
@@ -22,22 +22,6 @@ export function createMutators(authData: AuthData | null) {
             .one();
           if (!token) continue;
           await tx.mutate.plaidAccessTokens.delete({ id });
-
-          const balances = await tx.query.balance
-            .where("user_id", "=", authData.user.id)
-            .where("tokenId", "=", token.id)
-            .run();
-
-          for (const bal of balances) {
-            await tx.mutate.balance.delete({ id: bal.id });
-            const txs = await tx.query.transaction
-              .where("user_id", "=", authData.user.id)
-              .where("account_id", "=", bal.tokenId)
-              .run();
-            for (const transaction of txs) {
-              await tx.mutate.transaction.delete({ id: transaction.id });
-            }
-          }
         }
       },
     },
