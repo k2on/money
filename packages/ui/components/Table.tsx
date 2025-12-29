@@ -39,7 +39,7 @@ export const Context = createContext<TableState>(INITAL_STATE);
 export type Column = {
   name: string;
   label: string;
-  render?: (i: number | string) => string;
+  render?: <T>(i: T) => string;
 };
 
 function renderCell(row: ValidRecord, column: Column): string {
